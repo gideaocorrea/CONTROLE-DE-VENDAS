@@ -5,6 +5,551 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Control - PDV Completo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ✅ SDK DO FIREBASE ADICIONADO -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        /* SEU CSS ORIGINAL (mantido intacto) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* ... (TODO O SEU CSS ORIGINAL) ... */
+
+        /* ✅ NOVO ESTILO PARA STATUS DO FIREBASE */
+        .firebase-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #2ed573;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1001;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #2575fc;
+        }
+    </style>
+</head>
+<body>
+    <!-- ✅ INDICADOR DE CONEXÃO FIREBASE -->
+    <div class="firebase-status" id="firebase-status" style="display: none;">
+        <i class="fas fa-database"></i> Conectado ao Firebase
+    </div>
+    
+    <div class="container">
+        <!-- SEU HTML ORIGINAL (mantido intacto) -->
+        <div class="header">
+            <div class="user-actions">
+                <i class="fas fa-bell"></i>
+                <i class="fas fa-cog"></i>
+            </div>
+            <h2>Business Control</h2>
+            <div class="date-display" id="current-date">Segunda-feira, 25 de Setembro de 2023</div>
+        </div>
+        
+        <div class="content">
+            <!-- Dashboard Tab -->
+            <div class="tab-content" id="dashboard">
+                <div class="card">
+                    <div class="card-title">
+                        <span>Visão Geral</span>
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <p>Resumo do desempenho do seu negócio</p>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="today-sales">R$ 0,00</div>
+                            <div class="stat-label">Vendas Hoje</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="month-sales">R$ 0,00</div>
+                            <div class="stat-label">Vendas Mês</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="goal-percentage">0%</div>
+                            <div class="stat-label">Meta</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress" id="goal-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <span>Produtos Mais Vendidos</span>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    
+                    <div class="report-section" id="top-products-section">
+                        <div class="loading">Carregando produtos...</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <span>Melhores Clientes</span>
+                        <i class="fas fa-users"></i>
+                    </div>
+                    
+                    <div class="report-section" id="top-clients-section">
+                        <div class="loading">Carregando clientes...</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <span>Próximos Recebimentos</span>
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div id="dashboard-receivables">
+                        <div class="loading">Carregando recebíveis...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ... (TODO O SEU HTML ORIGINAL) ... -->
+        </div>
+        
+        <div class="nav">
+            <div class="nav-item" data-tab="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item active" data-tab="pdv">
+                <i class="fas fa-cash-register"></i>
+                <span>PDV</span>
+            </div>
+            <div class="nav-item" data-tab="stock">
+                <i class="fas fa-boxes"></i>
+                <span>Estoque</span>
+            </div>
+            <div class="nav-item" data-tab="clients">
+                <i class="fas fa-users"></i>
+                <span>Clientes</span>
+            </div>
+            <div class="nav-item" data-tab="receivables">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>A Receber</span>
+            </div>
+            <div class="nav-item" data-tab="reports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Relatórios</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Finalização de Venda -->
+    <div class="modal" id="sale-modal">
+        <!-- ... (modal original) ... -->
+    </div>
+
+    <script>
+        // ✅ CONFIGURAÇÃO DO FIREBASE - SUBSTITUA COM SUAS CONFIGURAÇÕES REAIS
+        const firebaseConfig = {
+            apiKey: "AIzaSyCLaJ6v5lw1Hq3Q2X7Q3a9bKj8LmNpOqRSt",
+            authDomain: "controle-de-vendas-bf26d.firebaseapp.com",
+            databaseURL: "https://controle-de-vendas-bf26d-default-rtdb.firebaseio.com",
+            projectId: "controle-de-vendas-bf26d",
+            storageBucket: "controle-de-vendas-bf26d.firebasestorage.app",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456789abcdef"
+        };
+
+        // ✅ INICIALIZAÇÃO DO FIREBASE
+        let database;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            document.getElementById('firebase-status').style.display = 'block';
+            console.log('✅ Firebase conectado com sucesso!');
+        } catch (error) {
+            console.error('❌ Erro ao conectar com Firebase:', error);
+        }
+
+        // Dados da aplicação (agora serão sincronizados com Firebase)
+        let cart = [];
+        let total = 0;
+        let clients = [];
+        let products = [];
+        let salesHistory = [];
+        let receivables = [];
+        
+        let sales = {
+            today: 0,
+            month: 0,
+            goal: 30000
+        };
+
+        // ✅ FUNÇÕES FIREBASE
+        async function saveToFirebase(path, data) {
+            try {
+                await database.ref(path).set(data);
+                console.log('✅ Dados salvos no Firebase:', path);
+                return true;
+            } catch (error) {
+                console.error('❌ Erro ao salvar no Firebase:', error);
+                return false;
+            }
+        }
+
+        async function loadFromFirebase(path) {
+            try {
+                const snapshot = await database.ref(path).once('value');
+                console.log('✅ Dados carregados do Firebase:', path);
+                return snapshot.val();
+            } catch (error) {
+                console.error('❌ Erro ao carregar do Firebase:', error);
+                return null;
+            }
+        }
+
+        function arrayToObject(array) {
+            const obj = {};
+            array.forEach(item => {
+                if (item && item.id) {
+                    obj[item.id] = item;
+                }
+            });
+            return obj;
+        }
+
+        // ✅ FUNÇÕES DE CARREGAMENTO ATUALIZADAS
+        async function loadClients() {
+            const firebaseClients = await loadFromFirebase('clients');
+            clients = firebaseClients ? Object.values(firebaseClients) : [];
+            
+            // Dados iniciais se não houver clientes
+            if (clients.length === 0) {
+                clients = [
+                    { id: 1, name: "João Silva", email: "joao@email.com", phone: "(11) 99999-9999", totalPurchases: 0 },
+                    { id: 2, name: "Maria Santos", email: "maria@email.com", phone: "(11) 98888-8888", totalPurchases: 0 },
+                    { id: 3, name: "Empresa ABC", email: "contato@empresa.com", phone: "(11) 97777-7777", totalPurchases: 0 }
+                ];
+                await saveToFirebase('clients', arrayToObject(clients));
+            }
+            
+            updateClientsUI();
+        }
+
+        async function loadProducts() {
+            const firebaseProducts = await loadFromFirebase('products');
+            products = firebaseProducts ? Object.values(firebaseProducts) : [];
+            updateProductsUI();
+        }
+
+        async function loadSalesHistory() {
+            const firebaseSales = await loadFromFirebase('sales');
+            salesHistory = firebaseSales ? Object.values(firebaseSales) : [];
+            calculateSalesTotals();
+            updateDashboard();
+        }
+
+        async function loadReceivables() {
+            const firebaseReceivables = await loadFromFirebase('receivables');
+            receivables = firebaseReceivables ? Object.values(firebaseReceivables) : [];
+            updateReceivablesUI();
+        }
+
+        // ✅ FUNÇÕES DE SALVAMENTO ATUALIZADAS
+        async function saveClient(client) {
+            if (client.id) {
+                const index = clients.findIndex(c => c.id === client.id);
+                if (index !== -1) {
+                    clients[index] = client;
+                }
+            } else {
+                const newId = clients.length > 0 ? Math.max(...clients.map(c => c.id)) + 1 : 1;
+                client.id = newId;
+                clients.push(client);
+            }
+            
+            await saveToFirebase('clients', arrayToObject(clients));
+            updateClientsUI();
+        }
+
+        async function saveProduct(product) {
+            if (product.id) {
+                const index = products.findIndex(p => p.id === product.id);
+                if (index !== -1) {
+                    products[index] = product;
+                }
+            } else {
+                const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                product.id = newId;
+                products.push(product);
+            }
+            
+            await saveToFirebase('products', arrayToObject(products));
+            updateProductsUI();
+        }
+
+        async function saveSale(sale) {
+            salesHistory.push(sale);
+            await saveToFirebase('sales', arrayToObject(salesHistory));
+        }
+
+        async function saveReceivable(receivable) {
+            receivables.push(receivable);
+            await saveToFirebase('receivables', arrayToObject(receivables));
+        }
+
+        // ✅ FUNÇÃO DE VENDA ATUALIZADA COM FIREBASE
+        async function finalizeSale(paymentMethod, clientId, dueDate = null) {
+            const clientName = clientId ? clients.find(c => c.id === parseInt(clientId)).name : 'Cliente não identificado';
+            
+            // Criar objeto de venda
+            const saleId = salesHistory.length > 0 ? Math.max(...salesHistory.map(s => s.id)) + 1 : 1;
+            const saleDate = new Date().toISOString();
+            
+            const sale = {
+                id: saleId,
+                date: saleDate,
+                clientId: clientId ? parseInt(clientId) : null,
+                clientName: clientName,
+                items: [...cart],
+                total: total,
+                paymentMethod: paymentMethod
+            };
+            
+            // Salvar venda no Firebase
+            await saveSale(sale);
+            
+            // Se for a prazo, criar recebível
+            if (paymentMethod === 'term' && dueDate) {
+                const receivableId = receivables.length > 0 ? Math.max(...receivables.map(r => r.id)) + 1 : 1;
+                const receivable = {
+                    id: receivableId,
+                    client: clientName,
+                    value: total,
+                    dueDate: dueDate,
+                    status: 'pending',
+                    saleId: saleId
+                };
+                await saveReceivable(receivable);
+            }
+            
+            // Atualizar cliente
+            if (clientId) {
+                const client = clients.find(c => c.id === parseInt(clientId));
+                if (client) {
+                    client.totalPurchases += total;
+                    await saveClient(client);
+                }
+            }
+            
+            // Atualizar estoque
+            await updateStockAfterSale();
+            
+            // Atualizar dashboard
+            sales.today += total;
+            sales.month += total;
+            
+            // Limpar carrinho
+            cart = [];
+            updateCart();
+            
+            // Recarregar dados
+            await loadProducts();
+            await loadReceivables();
+            updateDashboard();
+            
+            return true;
+        }
+
+        async function updateStockAfterSale() {
+            const updates = [];
+            cart.forEach(cartItem => {
+                const product = products.find(p => p.id === cartItem.id);
+                if (product) {
+                    product.stock -= cartItem.quantity;
+                    if (product.stock < 0) product.stock = 0;
+                    updates.push(saveProduct(product));
+                }
+            });
+            await Promise.all(updates);
+        }
+
+        // ✅ SUAS FUNÇÕES ORIGINAIS (com pequenas adaptações)
+        function updateClientsUI() {
+            clientSelect.innerHTML = '<option value="">Selecionar cliente...</option>';
+            clientList.innerHTML = '';
+            
+            clients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = client.name;
+                clientSelect.appendChild(option);
+                
+                const li = document.createElement('li');
+                li.className = 'client-item';
+                li.innerHTML = `
+                    <div class="client-info">
+                        <strong>${client.name}</strong>
+                        <div>${client.email} | ${client.phone}</div>
+                        <div>Total em compras: R$ ${client.totalPurchases.toFixed(2)}</div>
+                    </div>
+                    <div class="client-actions">
+                        <i class="fas fa-edit edit-client" data-id="${client.id}"></i>
+                        <i class="fas fa-trash delete-client" data-id="${client.id}"></i>
+                    </div>
+                `;
+                clientList.appendChild(li);
+            });
+            
+            // Adicionar event listeners
+            document.querySelectorAll('.edit-client').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const clientId = this.getAttribute('data-id');
+                    editClient(clientId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-client').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const clientId = this.getAttribute('data-id');
+                    deleteClient(clientId);
+                });
+            });
+        }
+
+        // ... (MANTENHA TODAS AS SUAS OUTRAS FUNÇÕES ORIGINAIS)
+
+        // ✅ INICIALIZAÇÃO ATUALIZADA
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Carregar dados do Firebase
+            await loadClients();
+            await loadProducts();
+            await loadSalesHistory();
+            await loadReceivables();
+            
+            updateDashboard();
+            setupEventListeners();
+            updateDateTime();
+            
+            const today = new Date().toISOString().split('T')[0];
+            dueDateInput.setAttribute('min', today);
+            
+            reportPeriod.addEventListener('change', generateReport);
+            reportType.addEventListener('change', generateReport);
+        });
+
+        // ✅ CONFIGURE OS EVENT LISTENERS PARA USAR AS FUNÇÕES ASYNC
+        function setupEventListeners() {
+            // Seus event listeners originais aqui...
+            
+            // Modifique os que salvam dados para usar async/await
+            saveClientBtn.addEventListener('click', async function() {
+                const id = clientIdInput.value;
+                const name = clientNameInput.value;
+                const email = clientEmailInput.value;
+                const phone = clientPhoneInput.value;
+                
+                if (!name) {
+                    alert('Por favor, preencha o nome do cliente.');
+                    return;
+                }
+                
+                const client = { 
+                    id: id ? parseInt(id) : null, 
+                    name, 
+                    email, 
+                    phone, 
+                    totalPurchases: id ? clients.find(c => c.id === parseInt(id))?.totalPurchases || 0 : 0 
+                };
+                
+                await saveClient(client);
+                clientFormCard.style.display = 'none';
+            });
+
+            saveProductBtn.addEventListener('click', async function() {
+                const id = productIdInput.value;
+                const name = productNameInput.value;
+                const code = productCodeInput.value;
+                const cost = parseFloat(productCostInput.value) || 0;
+                const price = parseFloat(productPriceInput.value) || 0;
+                const stock = parseInt(productStockInput.value) || 0;
+                
+                if (!name || !code) {
+                    alert('Por favor, preencha pelo menos o nome e código do produto.');
+                    return;
+                }
+                
+                const product = { id: id ? parseInt(id) : null, name, code, cost, price, stock };
+                await saveProduct(product);
+                productFormCard.style.display = 'none';
+            });
+
+            // Modifique a função de confirmar venda
+            confirmSaleBtn.addEventListener('click', async function() {
+                const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+                const clientId = clientSelect.value;
+                const dueDate = paymentMethod === 'term' ? dueDateInput.value : null;
+                
+                if (paymentMethod === 'term' && !dueDate) {
+                    alert('Por favor, selecione uma data de vencimento para vendas a prazo.');
+                    return;
+                }
+                
+                const success = await finalizeSale(paymentMethod, clientId, dueDate);
+                if (success) {
+                    saleModal.style.display = 'none';
+                    clientSelect.value = '';
+                    alert('Venda finalizada com sucesso!');
+                }
+            });
+        }
+
+        // ... (COLE AQUI TODAS AS SUAS OUTRAS FUNÇÕES ORIGINAIS)
+
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Control - PDV Completo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -2186,3 +2731,4 @@
     </script>
 </body>
 </html>
+
