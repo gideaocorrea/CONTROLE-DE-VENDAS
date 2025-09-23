@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Control - PDV Completo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Adicionando Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        /* Seus estilos CSS existentes permanecem os mesmos */
         * {
             margin: 0;
             padding: 0;
@@ -27,7 +25,501 @@
             padding: 20px;
         }
         
-        /* ... (todos os outros estilos permanecem exatamente como estão) ... */
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .user-actions {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+        
+        .user-actions i {
+            margin-left: 10px;
+            font-size: 18px;
+        }
+        
+        .date-display {
+            font-size: 14px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2575fc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2575fc;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .product-list, .client-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+        
+        .product-item, .client-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        
+        .product-item:last-child, .client-item:last-child {
+            border-bottom: none;
+        }
+        
+        .product-info, .client-info {
+            flex: 2;
+        }
+        
+        .product-stock, .client-value {
+            flex: 1;
+            text-align: right;
+            font-weight: 600;
+            color: #2575fc;
+        }
+        
+        .low-stock {
+            color: #ff4757;
+        }
+        
+        .nav {
+            display: flex;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 15px 0;
+            color: #888;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #2575fc;
+        }
+        
+        .nav-item i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress {
+            height: 100%;
+            background: #2575fc;
+            border-radius: 3px;
+        }
+        
+        .sale-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .sale-info {
+            flex: 2;
+        }
+        
+        .sale-value {
+            flex: 1;
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .paid {
+            color: #2ed573;
+        }
+        
+        .pending {
+            color: #ffa502;
+        }
+        
+        .overdue {
+            color: #ff4757;
+        }
+        
+        .btn {
+            background: #2575fc;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #1c60cb;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #ddd;
+        }
+        
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #ff2e43;
+        }
+        
+        .search-bar {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+        
+        .search-bar button {
+            background: #2575fc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 50px;
+            cursor: pointer;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .cart-item-info {
+            flex: 2;
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+        
+        .quantity-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .quantity-input {
+            width: 40px;
+            text-align: center;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 3px;
+        }
+        
+        .cart-item-price {
+            flex: 1;
+            text-align: right;
+            font-weight: 600;
+            color: #2575fc;
+        }
+        
+        .cart-total {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #2575fc;
+            text-align: right;
+        }
+        
+        .client-form, .product-form {
+            margin-top: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2575fc;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
+        
+        .empty-cart i {
+            font-size: 48px;
+            margin-bottom: 10px;
+            color: #ddd;
+        }
+        
+        .payment-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .payment-option.active {
+            border-color: #2575fc;
+            background-color: #f0f7ff;
+        }
+        
+        .payment-option input {
+            margin-right: 10px;
+        }
+        
+        .due-date-container {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .client-actions, .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .client-actions .btn, .product-actions .btn {
+            margin-top: 0;
+            width: auto;
+            flex: 1;
+        }
+
+        .product-actions-small {
+            display: flex;
+            gap: 5px;
+        }
+
+        .product-actions-small i {
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .fa-edit {
+            color: #2575fc;
+        }
+
+        .fa-trash {
+            color: #ff4757;
+        }
+
+        .receivable-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+            width: auto;
+        }
+        
+        .report-section {
+            margin-top: 15px;
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .report-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2575fc;
+        }
+        
+        .report-view-all {
+            font-size: 12px;
+            color: #888;
+            cursor: pointer;
+        }
+        
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        
+        .report-item:last-child {
+            border-bottom: none;
+        }
+        
+        .report-item-name {
+            flex: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .report-item-value {
+            flex: 1;
+            text-align: right;
+            font-weight: 600;
+            color: #2575fc;
+        }
+        
+        .report-empty {
+            text-align: center;
+            padding: 10px;
+            color: #888;
+            font-size: 12px;
+        }
         
         .report-filter {
             display: flex;
@@ -41,19 +533,17 @@
             border: 1px solid #ddd;
             border-radius: 8px;
         }
-        
-        /* Adicionando um indicador de carregamento */
+
         .loading {
-            display: none;
             text-align: center;
             padding: 10px;
             color: #2575fc;
         }
-        
+
         .loading i {
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -62,7 +552,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Seu HTML existente permanece exatamente o mesmo -->
         <div class="header">
             <div class="user-actions">
                 <i class="fas fa-bell"></i>
@@ -75,82 +564,400 @@
         <div class="content">
             <!-- Dashboard Tab -->
             <div class="tab-content" id="dashboard">
-                <!-- ... conteúdo do dashboard ... -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>Visão Geral</span>
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <p>Resumo do desempenho do seu negócio</p>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="today-sales">R$ 0,00</div>
+                            <div class="stat-label">Vendas Hoje</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="month-sales">R$ 0,00</div>
+                            <div class="stat-label">Vendas Mês</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="goal-percentage">0%</div>
+                            <div class="stat-label">Meta</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress" id="goal-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <span>Produtos Mais Vendidos</span>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    
+                    <div class="report-section" id="top-products-section">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <span>Melhores Clientes</span>
+                        <i class="fas fa-users"></i>
+                    </div>
+                    
+                    <div class="report-section" id="top-clients-section">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <span>Próximos Recebimentos</span>
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div id="dashboard-receivables">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i> Carregando...
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- PDV Tab -->
             <div class="tab-content active" id="pdv">
-                <!-- ... conteúdo do PDV ... -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>Ponto de Venda</span>
+                        <i class="fas fa-cash-register"></i>
+                    </div>
+                    
+                    <div class="search-bar">
+                        <input type="text" id="product-search" placeholder="Digite o código ou nome do produto">
+                        <button id="search-product-btn"><i class="fas fa-search"></i></button>
+                    </div>
+                    
+                    <h3>Produtos Disponíveis</h3>
+                    <ul class="product-list" id="product-list">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i> Carregando produtos...
+                        </div>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <span>Carrinho de Compras</span>
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    
+                    <div id="cart-items">
+                        <div class="empty-cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <p>Seu carrinho está vazio</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cart-total" id="cart-total" style="display: none;">
+                        Total: R$ <span id="total-value">0,00</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="client-select">Cliente</label>
+                        <select id="client-select" class="form-control">
+                            <option value="">Selecionar cliente...</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn" id="finalize-sale" disabled>Finalizar Venda</button>
+                </div>
             </div>
             
             <!-- Estoque Tab -->
             <div class="tab-content" id="stock">
-                <!-- ... conteúdo do estoque ... -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>Controle de Estoque</span>
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    
+                    <div class="search-bar">
+                        <input type="text" id="stock-search" placeholder="Buscar produto...">
+                        <button id="stock-search-btn"><i class="fas fa-search"></i></button>
+                    </div>
+                    
+                    <ul class="product-list" id="stock-list">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i> Carregando estoque...
+                        </div>
+                    </ul>
+                    
+                    <button class="btn" id="add-product-btn">Adicionar Produto</button>
+                </div>
+                
+                <div class="card" id="product-form-card" style="display: none;">
+                    <div class="card-title">
+                        <span id="product-form-title">Novo Produto</span>
+                        <i class="fas fa-box"></i>
+                    </div>
+                    
+                    <div class="product-form">
+                        <input type="hidden" id="product-id">
+                        <div class="form-group">
+                            <label for="product-name">Nome do Produto</label>
+                            <input type="text" id="product-name" placeholder="Nome do produto">
+                        </div>
+                        <div class="form-group">
+                            <label for="product-code">Código</label>
+                            <input type="text" id="product-code" placeholder="Código do produto">
+                        </div>
+                        <div class="form-group">
+                            <label for="product-cost">Preço de Custo (R$)</label>
+                            <input type="number" id="product-cost" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="product-price">Preço de Venda (R$)</label>
+                            <input type="number" id="product-price" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="product-stock">Estoque</label>
+                            <input type="number" id="product-stock" placeholder="0" min="0">
+                        </div>
+                        
+                        <div class="product-actions">
+                            <button class="btn btn-secondary" id="cancel-product">Cancelar</button>
+                            <button class="btn" id="save-product">Salvar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Clientes Tab -->
             <div class="tab-content" id="clients">
-                <!-- ... conteúdo dos clientes ... -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>Gerenciamento de Clientes</span>
+                        <i class="fas fa-users"></i>
+                    </div>
+                    
+                    <div class="search-bar">
+                        <input type="text" id="client-search" placeholder="Buscar cliente...">
+                        <button id="client-search-btn"><i class="fas fa-search"></i></button>
+                    </div>
+                    
+                    <ul class="client-list" id="client-list">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i> Carregando clientes...
+                        </div>
+                    </ul>
+                    
+                    <button class="btn" id="add-client-btn">Adicionar Cliente</button>
+                </div>
+                
+                <div class="card" id="client-form-card" style="display: none;">
+                    <div class="card-title">
+                        <span id="client-form-title">Novo Cliente</span>
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    
+                    <div class="client-form">
+                        <input type="hidden" id="client-id">
+                        <div class="form-group">
+                            <label for="client-name">Nome</label>
+                            <input type="text" id="client-name" placeholder="Nome completo">
+                        </div>
+                        <div class="form-group">
+                            <label for="client-email">E-mail</label>
+                            <input type="email" id="client-email" placeholder="exemplo@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="client-phone">Telefone</label>
+                            <input type="tel" id="client-phone" placeholder="(11) 99999-9999">
+                        </div>
+                        
+                        <div class="client-actions">
+                            <button class="btn btn-secondary" id="cancel-client">Cancelar</button>
+                            <button class="btn" id="save-client">Salvar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Receivables Tab -->
             <div class="tab-content" id="receivables">
-                <!-- ... conteúdo dos recebíveis ... -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>Vendas a Receber</span>
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    
+                    <ul class="client-list" id="receivables-list">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i> Carregando recebíveis...
+                        </div>
+                    </ul>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="to-receive-value">R$ 0,00</div>
+                            <div class="stat-label">A Vencer</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="overdue-value">R$ 0,00</div>
+                            <div class="stat-label">Atrasado</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="total-receivables">R$ 0,00</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Relatórios Tab -->
             <div class="tab-content" id="reports">
-                <!-- ... conteúdo dos relatórios ... -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>Relatórios Detalhados</span>
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    
+                    <div class="report-filter">
+                        <select id="report-period">
+                            <option value="today">Hoje</option>
+                            <option value="week">Esta Semana</option>
+                            <option value="month" selected>Este Mês</option>
+                            <option value="all">Todos</option>
+                        </select>
+                        
+                        <select id="report-type">
+                            <option value="products">Produtos</option>
+                            <option value="clients">Clientes</option>
+                            <option value="sales">Vendas</option>
+                        </select>
+                    </div>
+                    
+                    <div id="detailed-report">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i> Carregando relatórios...
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
         <div class="nav">
-            <!-- ... navegação ... -->
+            <div class="nav-item" data-tab="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item active" data-tab="pdv">
+                <i class="fas fa-cash-register"></i>
+                <span>PDV</span>
+            </div>
+            <div class="nav-item" data-tab="stock">
+                <i class="fas fa-boxes"></i>
+                <span>Estoque</span>
+            </div>
+            <div class="nav-item" data-tab="clients">
+                <i class="fas fa-users"></i>
+                <span>Clientes</span>
+            </div>
+            <div class="nav-item" data-tab="receivables">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>A Receber</span>
+            </div>
+            <div class="nav-item" data-tab="reports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Relatórios</span>
+            </div>
         </div>
     </div>
 
     <!-- Modal de Finalização de Venda -->
     <div class="modal" id="sale-modal">
-        <!-- ... conteúdo do modal ... -->
-    </div>
-
-    <!-- Adicionando indicador de carregamento -->
-    <div class="loading" id="loading-indicator">
-        <i class="fas fa-spinner"></i> Conectando ao banco de dados...
+        <div class="modal-content">
+            <div class="modal-title">Resumo da Venda</div>
+            
+            <div id="sale-summary">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+            
+            <div class="form-group">
+                <label>Forma de Pagamento</label>
+                
+                <div class="payment-option active" id="cash-option">
+                    <input type="radio" name="payment-method" value="cash" checked>
+                    <label for="cash">À Vista</label>
+                </div>
+                
+                <div class="payment-option" id="term-option">
+                    <input type="radio" name="payment-method" value="term">
+                    <label for="term">A Prazo</label>
+                </div>
+                
+                <div class="due-date-container" id="due-date-container">
+                    <div class="form-group">
+                        <label for="due-date">Data de Vencimento</label>
+                        <input type="date" id="due-date">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancel-sale">Cancelar</button>
+                <button class="btn" id="confirm-sale">Confirmar Venda</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Configuração do Firebase
+        // ==================== CONFIGURAÇÃO FIREBASE ====================
         const firebaseConfig = {
-            apiKey: "AIzaSyB6w3Y9cPp0Y2m9Xx4j8p3K2vQ5N7R8T9U",
+            apiKey: "AIzaSyDummyAPIKeyReplaceWithYours",
             authDomain: "controle-de-vendas-bf26d.firebaseapp.com",
             databaseURL: "https://controle-de-vendas-bf26d-default-rtdb.firebaseio.com",
             projectId: "controle-de-vendas-bf26d",
             storageBucket: "controle-de-vendas-bf26d.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdefghijklmnopqrstuv"
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
         };
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Dados da aplicação - agora serão carregados do Firebase
+        // Referências do Firebase
+        const dbRef = {
+            products: database.ref('products'),
+            clients: database.ref('clients'),
+            sales: database.ref('sales'),
+            receivables: database.ref('receivables'),
+            salesHistory: database.ref('salesHistory'),
+            appData: database.ref('appData')
+        };
+
+        // ==================== DADOS DA APLICAÇÃO ====================
         let cart = [];
         let total = 0;
         let clients = [];
         let products = [];
-        let salesHistory = [];
         let receivables = [];
+        let salesHistory = [];
         
-        // Dados de vendas para dashboard
         let sales = {
             today: 0,
             month: 0,
-            goal: 30000 // Meta mensal de R$ 30.000
+            goal: 30000
         };
-        
-        // Elementos do DOM (mantidos os mesmos)
+
+        // ==================== ELEMENTOS DO DOM ====================
         const productList = document.getElementById('product-list');
         const stockList = document.getElementById('stock-list');
         const cartItems = document.getElementById('cart-items');
@@ -207,182 +1014,193 @@
         const reportPeriod = document.getElementById('report-period');
         const reportType = document.getElementById('report-type');
         const detailedReport = document.getElementById('detailed-report');
-        const loadingIndicator = document.getElementById('loading-indicator');
 
-        // Funções para interagir com o Firebase
-        function showLoading() {
-            loadingIndicator.style.display = 'block';
-        }
-        
-        function hideLoading() {
-            loadingIndicator.style.display = 'none';
-        }
-        
-        // Carregar dados do Firebase
-        function loadDataFromFirebase() {
-            showLoading();
-            
+        // ==================== FUNÇÕES FIREBASE ====================
+        function loadFirebaseData() {
             // Carregar produtos
-            database.ref('products').once('value').then((snapshot) => {
+            dbRef.products.on('value', (snapshot) => {
+                products = [];
                 const data = snapshot.val();
                 if (data) {
-                    products = Object.values(data);
-                } else {
-                    products = [];
+                    Object.keys(data).forEach(key => {
+                        products.push({ id: key, ...data[key] });
+                    });
                 }
                 loadProducts();
             });
-            
+
             // Carregar clientes
-            database.ref('clients').once('value').then((snapshot) => {
+            dbRef.clients.on('value', (snapshot) => {
+                clients = [];
                 const data = snapshot.val();
                 if (data) {
-                    clients = Object.values(data);
-                } else {
-                    // Dados iniciais de exemplo se não houver dados
-                    clients = [
-                        { id: 1, name: "João Silva", email: "joao@email.com", phone: "(11) 99999-9999", totalPurchases: 0 },
-                        { id: 2, name: "Maria Santos", email: "maria@email.com", phone: "(11) 98888-8888", totalPurchases: 0 },
-                        { id: 3, name: "Empresa ABC", email: "contato@empresa.com", phone: "(11) 97777-7777", totalPurchases: 0 }
-                    ];
-                    // Salvar clientes iniciais no Firebase
-                    saveClientsToFirebase();
+                    Object.keys(data).forEach(key => {
+                        clients.push({ id: key, ...data[key] });
+                    });
                 }
                 loadClients();
             });
-            
-            // Carregar histórico de vendas
-            database.ref('salesHistory').once('value').then((snapshot) => {
+
+            // Carregar recebíveis
+            dbRef.receivables.on('value', (snapshot) => {
+                receivables = [];
                 const data = snapshot.val();
                 if (data) {
-                    salesHistory = Object.values(data);
-                } else {
-                    salesHistory = [];
+                    Object.keys(data).forEach(key => {
+                        receivables.push({ id: key, ...data[key] });
+                    });
+                }
+                loadReceivables();
+                updateDashboardReceivables();
+            });
+
+            // Carregar histórico de vendas
+            dbRef.salesHistory.on('value', (snapshot) => {
+                salesHistory = [];
+                const data = snapshot.val();
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        salesHistory.push({ id: key, ...data[key] });
+                    });
+                }
+                updateSalesData();
+                updateTopProductsReport();
+                updateTopClientsReport();
+            });
+
+            // Carregar dados das vendas
+            dbRef.appData.child('sales').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    sales.today = data.today || 0;
+                    sales.month = data.month || 0;
+                    sales.goal = data.goal || 30000;
                 }
                 updateDashboard();
             });
-            
-            // Carregar recebíveis
-            database.ref('receivables').once('value').then((snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    receivables = Object.values(data);
-                } else {
-                    receivables = [];
-                }
-                loadReceivables();
-                hideLoading();
-            });
-            
-            // Calcular vendas do dia e do mês
-            calculateSales();
-        }
-        
-        // Salvar produtos no Firebase
-        function saveProductsToFirebase() {
-            const productsObj = {};
-            products.forEach(product => {
-                productsObj[product.id] = product;
-            });
-            database.ref('products').set(productsObj);
-        }
-        
-        // Salvar clientes no Firebase
-        function saveClientsToFirebase() {
-            const clientsObj = {};
-            clients.forEach(client => {
-                clientsObj[client.id] = client;
-            });
-            database.ref('clients').set(clientsObj);
-        }
-        
-        // Salvar histórico de vendas no Firebase
-        function saveSalesHistoryToFirebase() {
-            const salesHistoryObj = {};
-            salesHistory.forEach(sale => {
-                salesHistoryObj[sale.id] = sale;
-            });
-            database.ref('salesHistory').set(salesHistoryObj);
-        }
-        
-        // Salvar recebíveis no Firebase
-        function saveReceivablesToFirebase() {
-            const receivablesObj = {};
-            receivables.forEach(receivable => {
-                receivablesObj[receivable.id] = receivable;
-            });
-            database.ref('receivables').set(receivablesObj);
-        }
-        
-        // Calcular vendas do dia e do mês
-        function calculateSales() {
-            const today = new Date();
-            const todayString = today.toISOString().split('T')[0];
-            const month = today.getMonth();
-            const year = today.getFullYear();
-            
-            sales.today = 0;
-            sales.month = 0;
-            
-            salesHistory.forEach(sale => {
-                const saleDate = new Date(sale.date);
-                const saleDateString = saleDate.toISOString().split('T')[0];
-                
-                if (saleDateString === todayString) {
-                    sales.today += sale.total;
-                }
-                
-                if (saleDate.getMonth() === month && saleDate.getFullYear() === year) {
-                    sales.month += sale.total;
-                }
-            });
-            
-            updateDashboard();
         }
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            // Carregar dados do Firebase
-            loadDataFromFirebase();
+        function saveProductToFirebase(product) {
+            if (product.id && product.id.length > 2) {
+                return dbRef.products.child(product.id).update({
+                    name: product.name,
+                    code: product.code,
+                    cost: product.cost,
+                    price: product.price,
+                    stock: product.stock
+                });
+            } else {
+                return dbRef.products.push({
+                    name: product.name,
+                    code: product.code,
+                    cost: product.cost,
+                    price: product.price,
+                    stock: product.stock
+                });
+            }
+        }
+
+        function saveClientToFirebase(client) {
+            if (client.id && client.id.length > 2) {
+                return dbRef.clients.child(client.id).update({
+                    name: client.name,
+                    email: client.email,
+                    phone: client.phone,
+                    totalPurchases: client.totalPurchases || 0
+                });
+            } else {
+                return dbRef.clients.push({
+                    name: client.name,
+                    email: client.email,
+                    phone: client.phone,
+                    totalPurchases: 0
+                });
+            }
+        }
+
+        function saveSaleToFirebase(sale) {
+            const saleRef = dbRef.salesHistory.push({
+                date: sale.date,
+                clientId: sale.clientId,
+                clientName: sale.clientName,
+                items: sale.items,
+                total: sale.total,
+                paymentMethod: sale.paymentMethod
+            });
+
+            const today = new Date().toDateString();
+            const saleDate = new Date(sale.date).toDateString();
             
-            // Configurar data mínima para o datepicker (hoje)
-            const today = new Date().toISOString().split('T')[0];
-            dueDateInput.setAttribute('min', today);
+            if (saleDate === today) {
+                sales.today += sale.total;
+            }
             
-            // Adicionar event listeners para os relatórios
-            reportPeriod.addEventListener('change', generateReport);
-            reportType.addEventListener('change', generateReport);
+            sales.month += sale.total;
             
-            setupEventListeners();
-            updateDateTime();
-        });
-        
-        // As funções restantes permanecem as mesmas, apenas atualizando as que salvam dados
-        // para também salvar no Firebase
-        
-        // Carregar clientes nos selects e listas
+            dbRef.appData.child('sales').set({
+                today: sales.today,
+                month: sales.month,
+                goal: sales.goal
+            });
+
+            return saleRef;
+        }
+
+        function saveReceivableToFirebase(receivable) {
+            if (receivable.id && receivable.id.length > 2) {
+                return dbRef.receivables.child(receivable.id).update({
+                    client: receivable.client,
+                    value: receivable.value,
+                    dueDate: receivable.dueDate,
+                    status: receivable.status
+                });
+            } else {
+                return dbRef.receivables.push({
+                    client: receivable.client,
+                    value: receivable.value,
+                    dueDate: receivable.dueDate,
+                    status: 'pending'
+                });
+            }
+        }
+
+        function deleteProductFromFirebase(productId) {
+            return dbRef.products.child(productId).remove();
+        }
+
+        function deleteClientFromFirebase(clientId) {
+            return dbRef.clients.child(clientId).remove();
+        }
+
+        function updateStockInFirebase(productId, newStock) {
+            return dbRef.products.child(productId).update({
+                stock: newStock
+            });
+        }
+
+        // ==================== FUNÇÕES ORIGINAIS COMPLETAS ====================
         function loadClients() {
-            // Limpar selects e listas
             clientSelect.innerHTML = '<option value="">Selecionar cliente...</option>';
             clientList.innerHTML = '';
-            
-            // Adicionar clientes ao select
+
+            if (clients.length === 0) {
+                clientList.innerHTML = '<div class="empty-cart"><p>Nenhum cliente cadastrado</p></div>';
+                return;
+            }
+
             clients.forEach(client => {
                 const option = document.createElement('option');
                 option.value = client.id;
                 option.textContent = client.name;
                 clientSelect.appendChild(option);
-            });
-            
-            // Adicionar clientes à lista
-            clients.forEach(client => {
+
                 const li = document.createElement('li');
                 li.className = 'client-item';
                 li.innerHTML = `
                     <div class="client-info">
                         <strong>${client.name}</strong>
                         <div>${client.email} | ${client.phone}</div>
-                        <div>Total em compras: R$ ${client.totalPurchases.toFixed(2)}</div>
+                        <div>Total em compras: R$ ${(client.totalPurchases || 0).toFixed(2)}</div>
                     </div>
                     <div class="client-actions">
                         <i class="fas fa-edit edit-client" data-id="${client.id}"></i>
@@ -391,8 +1209,7 @@
                 `;
                 clientList.appendChild(li);
             });
-            
-            // Adicionar event listeners para editar e excluir
+
             document.querySelectorAll('.edit-client').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -400,7 +1217,7 @@
                     editClient(clientId);
                 });
             });
-            
+
             document.querySelectorAll('.delete-client').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -409,19 +1226,17 @@
                 });
             });
         }
-        
-        // Carregar produtos
+
         function loadProducts() {
             productList.innerHTML = '';
             stockList.innerHTML = '';
-            
+
             if (products.length === 0) {
                 productList.innerHTML = '<div class="empty-cart"><p>Nenhum produto cadastrado</p></div>';
                 stockList.innerHTML = '<div class="empty-cart"><p>Nenhum produto cadastrado</p></div>';
                 return;
             }
-            
-            // Adicionar produtos à lista do PDV
+
             products.forEach(product => {
                 const li = document.createElement('li');
                 li.className = 'product-item';
@@ -437,8 +1252,7 @@
                 `;
                 productList.appendChild(li);
             });
-            
-            // Adicionar produtos à lista de estoque
+
             products.forEach(product => {
                 const li = document.createElement('li');
                 li.className = 'product-item';
@@ -458,8 +1272,7 @@
                 `;
                 stockList.appendChild(li);
             });
-            
-            // Adicionar event listeners para editar e excluir produtos
+
             document.querySelectorAll('.edit-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -467,7 +1280,7 @@
                     editProduct(productId);
                 });
             });
-            
+
             document.querySelectorAll('.delete-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -476,17 +1289,15 @@
                 });
             });
         }
-        
-        // Calcular margem de lucro
+
         function calculateMargin(cost, price) {
             if (cost === 0) return 100;
             return (((price - cost) / cost) * 100).toFixed(2);
         }
-        
-        // Carregar vendas a receber
+
         function loadReceivables() {
             receivablesList.innerHTML = '';
-            
+
             if (receivables.length === 0) {
                 receivablesList.innerHTML = '<div class="empty-cart"><p>Nenhuma venda a receber</p></div>';
                 toReceiveValueElement.textContent = 'R$ 0,00';
@@ -494,18 +1305,17 @@
                 totalReceivablesElement.textContent = 'R$ 0,00';
                 return;
             }
-            
+
             let toReceiveTotal = 0;
             let overdueTotal = 0;
             let totalReceivables = 0;
-            
+
             receivables.forEach(item => {
-                // Verificar status
                 const today = new Date();
                 const dueDate = new Date(item.dueDate);
                 let status = 'pending';
                 let statusClass = 'pending';
-                
+
                 if (item.status === 'paid') {
                     status = 'paid';
                     statusClass = 'paid';
@@ -516,12 +1326,11 @@
                 } else {
                     toReceiveTotal += item.value;
                 }
-                
+
                 totalReceivables += item.value;
-                
-                // Formatar data
+
                 const formattedDate = dueDate.toLocaleDateString('pt-BR');
-                
+
                 const li = document.createElement('li');
                 li.className = 'client-item';
                 li.innerHTML = `
@@ -538,13 +1347,11 @@
                 `;
                 receivablesList.appendChild(li);
             });
-            
-            // Atualizar totais
+
             toReceiveValueElement.textContent = `R$ ${toReceiveTotal.toFixed(2)}`;
             overdueValueElement.textContent = `R$ ${overdueTotal.toFixed(2)}`;
             totalReceivablesElement.textContent = `R$ ${totalReceivables.toFixed(2)}`;
-            
-            // Adicionar event listeners para o botão de receber
+
             document.querySelectorAll('.receive-payment').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const receivableId = this.getAttribute('data-id');
@@ -552,31 +1359,48 @@
                 });
             });
         }
-        
-        // Atualizar dashboard
+
+        function updateSalesData() {
+            const today = new Date().toDateString();
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+
+            sales.today = 0;
+            sales.month = 0;
+
+            salesHistory.forEach(sale => {
+                const saleDate = new Date(sale.date);
+                if (saleDate.toDateString() === today) {
+                    sales.today += sale.total;
+                }
+                if (saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear) {
+                    sales.month += sale.total;
+                }
+            });
+
+            dbRef.appData.child('sales').set({
+                today: sales.today,
+                month: sales.month,
+                goal: sales.goal
+            });
+        }
+
         function updateDashboard() {
-            // Atualizar vendas
             todaySalesElement.textContent = `R$ ${sales.today.toFixed(2)}`;
             monthSalesElement.textContent = `R$ ${sales.month.toFixed(2)}`;
             
-            // Calcular porcentagem da meta
             const goalPercentage = sales.month > 0 ? Math.min(100, (sales.month / sales.goal) * 100) : 0;
             goalPercentageElement.textContent = `${goalPercentage.toFixed(0)}%`;
             goalProgressElement.style.width = `${goalPercentage}%`;
             
-            // Atualizar recebíveis no dashboard
             updateDashboardReceivables();
-            
-            // Atualizar relatórios
             updateTopProductsReport();
             updateTopClientsReport();
         }
-        
-        // Atualizar recebíveis no dashboard
+
         function updateDashboardReceivables() {
             dashboardReceivables.innerHTML = '';
             
-            // Filtrar apenas recebíveis pendentes e vencidos
             const pendingReceivables = receivables.filter(item => {
                 if (item.status === 'paid') return false;
                 
@@ -584,7 +1408,6 @@
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 
-                // Mostrar apenas os que vencem nos próximos 7 dias ou estão atrasados
                 const diffTime = dueDate.getTime() - today.getTime();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
@@ -596,10 +1419,8 @@
                 return;
             }
             
-            // Ordenar por data de vencimento (mais próximos primeiro)
             pendingReceivables.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
             
-            // Mostrar apenas os 3 mais próximos
             const recentReceivables = pendingReceivables.slice(0, 3);
             
             recentReceivables.forEach(item => {
@@ -632,10 +1453,8 @@
                 dashboardReceivables.appendChild(saleItem);
             });
         }
-        
-        // Atualizar relatório de produtos mais vendidos
+
         function updateTopProductsReport() {
-            // Calcular totais de vendas por produto
             const productSales = {};
             
             salesHistory.forEach(sale => {
@@ -654,12 +1473,10 @@
                 });
             });
             
-            // Converter para array e ordenar por quantidade vendida
             const topProducts = Object.values(productSales)
                 .sort((a, b) => b.quantity - a.quantity)
-                .slice(0, 5); // Top 5 produtos
+                .slice(0, 5);
             
-            // Atualizar a interface
             topProductsSection.innerHTML = '';
             
             if (topProducts.length === 0) {
@@ -677,16 +1494,13 @@
                 topProductsSection.appendChild(itemElement);
             });
         }
-        
-        // Atualizar relatório de melhores clientes
+
         function updateTopClientsReport() {
-            // Ordenar clientes por valor total de compras
             const topClients = [...clients]
                 .filter(client => client.totalPurchases > 0)
                 .sort((a, b) => b.totalPurchases - a.totalPurchases)
-                .slice(0, 5); // Top 5 clientes
+                .slice(0, 5);
             
-            // Atualizar a interface
             topClientsSection.innerHTML = '';
             
             if (topClients.length === 0) {
@@ -704,15 +1518,13 @@
                 topClientsSection.appendChild(itemElement);
             });
         }
-        
-        // Gerar relatório detalhado
+
         function generateReport() {
             const period = reportPeriod.value;
             const type = reportType.value;
             
             detailedReport.innerHTML = '';
             
-            // Filtrar vendas pelo período selecionado
             let filteredSales = [];
             const today = new Date();
             
@@ -752,7 +1564,6 @@
                 return;
             }
             
-            // Gerar relatório com base no tipo selecionado
             if (type === 'products') {
                 generateProductReport(filteredSales);
             } else if (type === 'clients') {
@@ -761,8 +1572,7 @@
                 generateSalesReport(filteredSales);
             }
         }
-        
-        // Gerar relatório de produtos
+
         function generateProductReport(sales) {
             const productSales = {};
             
@@ -810,8 +1620,7 @@
             
             detailedReport.innerHTML = reportHTML;
         }
-        
-        // Gerar relatório de clientes
+
         function generateClientReport(sales) {
             const clientSales = {};
             
@@ -859,8 +1668,7 @@
             
             detailedReport.innerHTML = reportHTML;
         }
-        
-        // Gerar relatório de vendas
+
         function generateSalesReport(sales) {
             const dailySales = {};
             
@@ -910,324 +1718,7 @@
             
             detailedReport.innerHTML = reportHTML;
         }
-        
-        // Configurar event listeners
-        function setupEventListeners() {
-            // Navegação por abas
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    const tab = this.getAttribute('data-tab');
-                    
-                    // Ativar aba clicada
-                    document.querySelectorAll('.nav-item').forEach(nav => {
-                        nav.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    
-                    // Mostrar conteúdo correspondente
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    document.getElementById(tab).classList.add('active');
-                    
-                    // Se for a aba de relatórios, gerar o relatório
-                    if (tab === 'reports') {
-                        generateReport();
-                    }
-                });
-            });
-            
-            // Adicionar produto ao carrinho
-            productList.addEventListener('click', function(e) {
-                const productItem = e.target.closest('.product-item');
-                if (productItem) {
-                    const productId = parseInt(productItem.getAttribute('data-id'));
-                    const productName = productItem.getAttribute('data-name');
-                    const productPrice = parseFloat(productItem.getAttribute('data-price'));
-                    
-                    // Verificar se o produto já está no carrinho
-                    const existingItem = cart.find(item => item.id === productId);
-                    
-                    if (existingItem) {
-                        // Verificar se há estoque disponível
-                        const product = products.find(p => p.id === productId);
-                        if (existingItem.quantity < product.stock) {
-                            existingItem.quantity++;
-                        } else {
-                            alert('Estoque insuficiente para este produto!');
-                        }
-                    } else {
-                        // Verificar se há estoque disponível
-                        const product = products.find(p => p.id === productId);
-                        if (product.stock > 0) {
-                            cart.push({
-                                id: productId,
-                                name: productName,
-                                price: productPrice,
-                                quantity: 1
-                            });
-                        } else {
-                            alert('Produto sem estoque disponível!');
-                        }
-                    }
-                    
-                    updateCart();
-                }
-            });
-            
-            // Finalizar venda
-            finalizeSaleBtn.addEventListener('click', function() {
-                if (cart.length === 0) return;
-                
-                // Criar resumo da venda
-                let summaryHTML = '<div class="sale-summary">';
-                cart.forEach(item => {
-                    summaryHTML += `
-                        <div class="sale-item">
-                            <div class="sale-info">${item.name} x ${item.quantity}</div>
-                            <div class="sale-value">R$ ${(item.price * item.quantity).toFixed(2)}</div>
-                        </div>
-                    `;
-                });
-                summaryHTML += `
-                    <div class="cart-total">
-                        Total: R$ ${total.toFixed(2)}
-                    </div>
-                `;
-                
-                // Adicionar informações do cliente se selecionado
-                const clientId = clientSelect.value;
-                if (clientId) {
-                    const client = clients.find(c => c.id === parseInt(clientId));
-                    summaryHTML += `<p><strong>Cliente:</strong> ${client.name}</p>`;
-                }
-                
-                summaryHTML += '</div>';
-                
-                saleSummary.innerHTML = summaryHTML;
-                
-                // Mostrar modal
-                saleModal.style.display = 'flex';
-            });
-            
-            // Opções de pagamento
-            cashOption.addEventListener('click', function() {
-                cashOption.classList.add('active');
-                termOption.classList.remove('active');
-                document.querySelector('input[name="payment-method"][value="cash"]').checked = true;
-                dueDateContainer.style.display = 'none';
-            });
-            
-            termOption.addEventListener('click', function() {
-                termOption.classList.add('active');
-                cashOption.classList.remove('active');
-                document.querySelector('input[name="payment-method"][value="term"]').checked = true;
-                dueDateContainer.style.display = 'block';
-            });
-            
-            // Confirmar venda
-            confirmSaleBtn.addEventListener('click', function() {
-                const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
-                const clientId = clientSelect.value;
-                const clientName = clientId ? clients.find(c => c.id === parseInt(clientId)).name : 'Cliente não identificado';
-                
-                if (paymentMethod === 'term') {
-                    const dueDate = dueDateInput.value;
-                    if (!dueDate) {
-                        alert('Por favor, selecione uma data de vencimento para vendas a prazo.');
-                        return;
-                    }
-                    
-                    // Adicionar à lista de recebíveis
-                    const receivableId = receivables.length > 0 ? Math.max(...receivables.map(r => r.id)) + 1 : 1;
-                    receivables.push({
-                        id: receivableId,
-                        client: clientName,
-                        value: total,
-                        dueDate: dueDate,
-                        status: 'pending'
-                    });
-                    
-                    // Salvar recebíveis no Firebase
-                    saveReceivablesToFirebase();
-                }
-                
-                // Registrar venda no histórico
-                const saleId = salesHistory.length > 0 ? Math.max(...salesHistory.map(s => s.id)) + 1 : 1;
-                const saleDate = new Date().toISOString();
-                
-                salesHistory.push({
-                    id: saleId,
-                    date: saleDate,
-                    clientId: clientId ? parseInt(clientId) : null,
-                    clientName: clientName,
-                    items: [...cart],
-                    total: total,
-                    paymentMethod: paymentMethod
-                });
-                
-                // Salvar histórico de vendas no Firebase
-                saveSalesHistoryToFirebase();
-                
-                // Atualizar total de compras do cliente
-                if (clientId) {
-                    const client = clients.find(c => c.id === parseInt(clientId));
-                    if (client) {
-                        client.totalPurchases += total;
-                        // Salvar clientes atualizados no Firebase
-                        saveClientsToFirebase();
-                    }
-                }
-                
-                // Atualizar estoque
-                updateStockAfterSale();
-                
-                // Atualizar vendas
-                const saleValue = total;
-                sales.today += saleValue;
-                sales.month += saleValue;
-                
-                // Limpar carrinho
-                cart = [];
-                updateCart();
-                
-                // Fechar modal
-                saleModal.style.display = 'none';
-                
-                // Recarregar dados
-                loadProducts();
-                loadReceivables();
-                updateDashboard();
-                
-                // Resetar seleção de cliente
-                clientSelect.value = '';
-                
-                alert('Venda finalizada com sucesso!');
-            });
-            
-            // Cancelar venda
-            cancelSaleBtn.addEventListener('click', function() {
-                saleModal.style.display = 'none';
-            });
-            
-            // Clientes - Adicionar/Editar
-            addClientBtn.addEventListener('click', function() {
-                clientFormTitle.textContent = 'Novo Cliente';
-                clientIdInput.value = '';
-                clientNameInput.value = '';
-                clientEmailInput.value = '';
-                clientPhoneInput.value = '';
-                clientFormCard.style.display = 'block';
-            });
-            
-            cancelClientBtn.addEventListener('click', function() {
-                clientFormCard.style.display = 'none';
-            });
-            
-            saveClientBtn.addEventListener('click', function() {
-                const id = clientIdInput.value;
-                const name = clientNameInput.value;
-                const email = clientEmailInput.value;
-                const phone = clientPhoneInput.value;
-                
-                if (!name) {
-                    alert('Por favor, preencha o nome do cliente.');
-                    return;
-                }
-                
-                if (id) {
-                    // Editar cliente existente
-                    const index = clients.findIndex(c => c.id === parseInt(id));
-                    if (index !== -1) {
-                        clients[index] = { 
-                            id: parseInt(id), 
-                            name, 
-                            email, 
-                            phone, 
-                            totalPurchases: clients[index].totalPurchases 
-                        };
-                    }
-                } else {
-                    // Adicionar novo cliente
-                    const newId = clients.length > 0 ? Math.max(...clients.map(c => c.id)) + 1 : 1;
-                    clients.push({ id: newId, name, email, phone, totalPurchases: 0 });
-                }
-                
-                // Salvar clientes no Firebase
-                saveClientsToFirebase();
-                
-                loadClients();
-                clientFormCard.style.display = 'none';
-            });
-            
-            // Produtos - Adicionar/Editar
-            addProductBtn.addEventListener('click', function() {
-                productFormTitle.textContent = 'Novo Produto';
-                productIdInput.value = '';
-                productNameInput.value = '';
-                productCodeInput.value = '';
-                productCostInput.value = '';
-                productPriceInput.value = '';
-                productStockInput.value = '';
-                productFormCard.style.display = 'block';
-            });
-            
-            cancelProductBtn.addEventListener('click', function() {
-                productFormCard.style.display = 'none';
-            });
-            
-            saveProductBtn.addEventListener('click', function() {
-                const id = productIdInput.value;
-                const name = productNameInput.value;
-                const code = productCodeInput.value;
-                const cost = parseFloat(productCostInput.value) || 0;
-                const price = parseFloat(productPriceInput.value) || 0;
-                const stock = parseInt(productStockInput.value) || 0;
-                
-                if (!name || !code) {
-                    alert('Por favor, preencha pelo menos o nome e código do produto.');
-                    return;
-                }
-                
-                if (id) {
-                    // Editar produto existente
-                    const index = products.findIndex(p => p.id === parseInt(id));
-                    if (index !== -1) {
-                        products[index] = { id: parseInt(id), name, code, cost, price, stock };
-                    }
-                } else {
-                    // Adicionar novo produto
-                    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-                    products.push({ id: newId, name, code, cost, price, stock });
-                }
-                
-                // Salvar produtos no Firebase
-                saveProductsToFirebase();
-                
-                loadProducts();
-                productFormCard.style.display = 'none';
-            });
-            
-            // Buscar produtos
-            searchProductBtn.addEventListener('click', searchProducts);
-            productSearchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') searchProducts();
-            });
-            
-            // Buscar estoque
-            stockSearchBtn.addEventListener('click', searchStock);
-            stockSearchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') searchStock();
-            });
-            
-            // Buscar clientes
-            clientSearchBtn.addEventListener('click', searchClients);
-            clientSearchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') searchClients();
-            });
-        }
-        
-        // Atualizar carrinho
+
         function updateCart() {
             cartItems.innerHTML = '';
             
@@ -1271,13 +1762,11 @@
             cartTotal.style.display = 'block';
             finalizeSaleBtn.disabled = false;
             
-            // Adicionar event listeners para os botões de quantidade
             document.querySelectorAll('.increase').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const productId = parseInt(this.getAttribute('data-id'));
                     const cartItem = cart.find(item => item.id === productId);
                     
-                    // Verificar se há estoque disponível
                     const product = products.find(p => p.id === productId);
                     if (cartItem.quantity < product.stock) {
                         cartItem.quantity++;
@@ -1306,7 +1795,6 @@
                     const cartItem = cart.find(item => item.id === productId);
                     const newQuantity = parseInt(this.value) || 1;
                     
-                    // Verificar se há estoque disponível
                     const product = products.find(p => p.id === productId);
                     if (newQuantity <= product.stock) {
                         cartItem.quantity = newQuantity;
@@ -1326,24 +1814,9 @@
                 });
             });
         }
-        
-        // Atualizar estoque após venda
-        function updateStockAfterSale() {
-            cart.forEach(cartItem => {
-                const product = products.find(p => p.id === cartItem.id);
-                if (product) {
-                    product.stock -= cartItem.quantity;
-                    if (product.stock < 0) product.stock = 0;
-                }
-            });
-            
-            // Salvar produtos atualizados no Firebase
-            saveProductsToFirebase();
-        }
-        
-        // Editar cliente
+
         function editClient(clientId) {
-            const client = clients.find(c => c.id === parseInt(clientId));
+            const client = clients.find(c => c.id === clientId);
             if (client) {
                 clientFormTitle.textContent = 'Editar Cliente';
                 clientIdInput.value = client.id;
@@ -1353,20 +1826,9 @@
                 clientFormCard.style.display = 'block';
             }
         }
-        
-        // Excluir cliente
-        function deleteClient(clientId) {
-            if (confirm('Tem certeza que deseja excluir este cliente?')) {
-                clients = clients.filter(c => c.id !== parseInt(clientId));
-                // Salvar clientes atualizados no Firebase
-                saveClientsToFirebase();
-                loadClients();
-            }
-        }
-        
-        // Editar produto
+
         function editProduct(productId) {
-            const product = products.find(p => p.id === parseInt(productId));
+            const product = products.find(p => p.id === productId);
             if (product) {
                 productFormTitle.textContent = 'Editar Produto';
                 productIdInput.value = product.id;
@@ -1378,32 +1840,37 @@
                 productFormCard.style.display = 'block';
             }
         }
-        
-        // Excluir produto
-        function deleteProduct(productId) {
-            if (confirm('Tem certeza que deseja excluir este produto?')) {
-                products = products.filter(p => p.id !== parseInt(productId));
-                // Salvar produtos atualizados no Firebase
-                saveProductsToFirebase();
-                loadProducts();
+
+        function deleteClient(clientId) {
+            if (confirm('Tem certeza que deseja excluir este cliente?')) {
+                deleteClientFromFirebase(clientId)
+                    .catch(error => {
+                        console.error('Erro ao excluir cliente:', error);
+                        alert('Erro ao excluir cliente. Tente novamente.');
+                    });
             }
         }
-        
-        // Receber pagamento
+
+        function deleteProduct(productId) {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                deleteProductFromFirebase(productId)
+                    .catch(error => {
+                        console.error('Erro ao excluir produto:', error);
+                        alert('Erro ao excluir produto. Tente novamente.');
+                    });
+            }
+        }
+
         function receivePayment(receivableId) {
             if (confirm('Deseja marcar este recebível como pago?')) {
-                const receivable = receivables.find(r => r.id === parseInt(receivableId));
+                const receivable = receivables.find(r => r.id === receivableId);
                 if (receivable) {
                     receivable.status = 'paid';
-                    // Salvar recebíveis atualizados no Firebase
-                    saveReceivablesToFirebase();
-                    loadReceivables();
-                    updateDashboardReceivables();
+                    saveReceivableToFirebase(receivable);
                 }
             }
         }
-        
-        // Buscar produtos
+
         function searchProducts() {
             const searchTerm = productSearchInput.value.toLowerCase();
             
@@ -1440,8 +1907,7 @@
                 productList.appendChild(li);
             });
         }
-        
-        // Buscar estoque
+
         function searchStock() {
             const searchTerm = stockSearchInput.value.toLowerCase();
             
@@ -1482,7 +1948,6 @@
                 stockList.appendChild(li);
             });
             
-            // Adicionar event listeners para editar e excluir produtos
             document.querySelectorAll('.edit-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1499,8 +1964,7 @@
                 });
             });
         }
-        
-        // Buscar clientes
+
         function searchClients() {
             const searchTerm = clientSearchInput.value.toLowerCase();
             
@@ -1529,7 +1993,7 @@
                     <div class="client-info">
                         <strong>${client.name}</strong>
                         <div>${client.email} | ${client.phone}</div>
-                        <div>Total em compras: R$ ${client.totalPurchases.toFixed(2)}</div>
+                        <div>Total em compras: R$ ${(client.totalPurchases || 0).toFixed(2)}</div>
                     </div>
                     <div class="client-actions">
                         <i class="fas fa-edit edit-client" data-id="${client.id}"></i>
@@ -1539,7 +2003,6 @@
                 clientList.appendChild(li);
             });
             
-            // Adicionar event listeners para editar e excluir
             document.querySelectorAll('.edit-client').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1556,18 +2019,305 @@
                 });
             });
         }
-        
-        // Atualizar data e hora
+
         function updateDateTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateString = now.toLocaleDateString('pt-BR', options);
-            
-            // Capitalizar primeira letra
             const formattedDate = dateString.charAt(0).toUpperCase() + dateString.slice(1);
-            
             document.querySelector('.date-display').textContent = formattedDate;
         }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const tab = this.getAttribute('data-tab');
+                    
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tab).classList.add('active');
+                    
+                    if (tab === 'reports') {
+                        generateReport();
+                    }
+                });
+            });
+            
+            productList.addEventListener('click', function(e) {
+                const productItem = e.target.closest('.product-item');
+                if (productItem) {
+                    const productId = productItem.getAttribute('data-id');
+                    const productName = productItem.getAttribute('data-name');
+                    const productPrice = parseFloat(productItem.getAttribute('data-price'));
+                    
+                    const existingItem = cart.find(item => item.id === productId);
+                    
+                    if (existingItem) {
+                        const product = products.find(p => p.id === productId);
+                        if (existingItem.quantity < product.stock) {
+                            existingItem.quantity++;
+                        } else {
+                            alert('Estoque insuficiente para este produto!');
+                        }
+                    } else {
+                        const product = products.find(p => p.id === productId);
+                        if (product.stock > 0) {
+                            cart.push({
+                                id: productId,
+                                name: productName,
+                                price: productPrice,
+                                quantity: 1
+                            });
+                        } else {
+                            alert('Produto sem estoque disponível!');
+                        }
+                    }
+                    
+                    updateCart();
+                }
+            });
+            
+            finalizeSaleBtn.addEventListener('click', function() {
+                if (cart.length === 0) return;
+                
+                let summaryHTML = '<div class="sale-summary">';
+                cart.forEach(item => {
+                    summaryHTML += `
+                        <div class="sale-item">
+                            <div class="sale-info">${item.name} x ${item.quantity}</div>
+                            <div class="sale-value">R$ ${(item.price * item.quantity).toFixed(2)}</div>
+                        </div>
+                    `;
+                });
+                summaryHTML += `
+                    <div class="cart-total">
+                        Total: R$ ${total.toFixed(2)}
+                    </div>
+                `;
+                
+                const clientId = clientSelect.value;
+                if (clientId) {
+                    const client = clients.find(c => c.id === clientId);
+                    summaryHTML += `<p><strong>Cliente:</strong> ${client.name}</p>`;
+                }
+                
+                summaryHTML += '</div>';
+                
+                saleSummary.innerHTML = summaryHTML;
+                saleModal.style.display = 'flex';
+            });
+            
+            cashOption.addEventListener('click', function() {
+                cashOption.classList.add('active');
+                termOption.classList.remove('active');
+                document.querySelector('input[name="payment-method"][value="cash"]').checked = true;
+                dueDateContainer.style.display = 'none';
+            });
+            
+            termOption.addEventListener('click', function() {
+                termOption.classList.add('active');
+                cashOption.classList.remove('active');
+                document.querySelector('input[name="payment-method"][value="term"]').checked = true;
+                dueDateContainer.style.display = 'block';
+            });
+            
+            confirmSaleBtn.addEventListener('click', function() {
+                const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+                const clientId = clientSelect.value;
+                const client = clientId ? clients.find(c => c.id === clientId) : null;
+                const clientName = client ? client.name : 'Cliente não identificado';
+
+                if (paymentMethod === 'term') {
+                    const dueDate = dueDateInput.value;
+                    if (!dueDate) {
+                        alert('Por favor, selecione uma data de vencimento para vendas a prazo.');
+                        return;
+                    }
+
+                    const receivableData = {
+                        client: clientName,
+                        value: total,
+                        dueDate: dueDate,
+                        status: 'pending'
+                    };
+
+                    saveReceivableToFirebase(receivableData);
+                }
+
+                const saleData = {
+                    date: new Date().toISOString(),
+                    clientId: clientId,
+                    clientName: clientName,
+                    items: [...cart],
+                    total: total,
+                    paymentMethod: paymentMethod
+                };
+
+                saveSaleToFirebase(saleData)
+                    .then(() => {
+                        if (client) {
+                            client.totalPurchases = (client.totalPurchases || 0) + total;
+                            saveClientToFirebase(client);
+                        }
+
+                        cart.forEach(cartItem => {
+                            const product = products.find(p => p.id === cartItem.id);
+                            if (product) {
+                                const newStock = product.stock - cartItem.quantity;
+                                updateStockInFirebase(product.id, newStock);
+                            }
+                        });
+
+                        cart = [];
+                        updateCart();
+                        saleModal.style.display = 'none';
+                        clientSelect.value = '';
+                        alert('Venda finalizada com sucesso!');
+                    })
+                    .catch(error => {
+                        console.error('Erro ao salvar venda:', error);
+                        alert('Erro ao finalizar venda. Tente novamente.');
+                    });
+            });
+            
+            cancelSaleBtn.addEventListener('click', function() {
+                saleModal.style.display = 'none';
+            });
+            
+            addClientBtn.addEventListener('click', function() {
+                clientFormTitle.textContent = 'Novo Cliente';
+                clientIdInput.value = '';
+                clientNameInput.value = '';
+                clientEmailInput.value = '';
+                clientPhoneInput.value = '';
+                clientFormCard.style.display = 'block';
+            });
+            
+            cancelClientBtn.addEventListener('click', function() {
+                clientFormCard.style.display = 'none';
+            });
+            
+            saveClientBtn.addEventListener('click', function() {
+                const id = clientIdInput.value;
+                const name = clientNameInput.value;
+                const email = clientEmailInput.value;
+                const phone = clientPhoneInput.value;
+
+                if (!name) {
+                    alert('Por favor, preencha o nome do cliente.');
+                    return;
+                }
+
+                const clientData = { id, name, email, phone };
+
+                saveClientToFirebase(clientData)
+                    .then(() => {
+                        clientFormCard.style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Erro ao salvar cliente:', error);
+                        alert('Erro ao salvar cliente. Tente novamente.');
+                    });
+            });
+            
+            addProductBtn.addEventListener('click', function() {
+                productFormTitle.textContent = 'Novo Produto';
+                productIdInput.value = '';
+                productNameInput.value = '';
+                productCodeInput.value = '';
+                productCostInput.value = '';
+                productPriceInput.value = '';
+                productStockInput.value = '';
+                productFormCard.style.display = 'block';
+            });
+            
+            cancelProductBtn.addEventListener('click', function() {
+                productFormCard.style.display = 'none';
+            });
+            
+            saveProductBtn.addEventListener('click', function() {
+                const id = productIdInput.value;
+                const name = productNameInput.value;
+                const code = productCodeInput.value;
+                const cost = parseFloat(productCostInput.value) || 0;
+                const price = parseFloat(productPriceInput.value) || 0;
+                const stock = parseInt(productStockInput.value) || 0;
+
+                if (!name || !code) {
+                    alert('Por favor, preencha pelo menos o nome e código do produto.');
+                    return;
+                }
+
+                const productData = { id, name, code, cost, price, stock };
+
+                saveProductToFirebase(productData)
+                    .then(() => {
+                        productFormCard.style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Erro ao salvar produto:', error);
+                        alert('Erro ao salvar produto. Tente novamente.');
+                    });
+            });
+            
+            searchProductBtn.addEventListener('click', searchProducts);
+            productSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchProducts();
+            });
+            
+            stockSearchBtn.addEventListener('click', searchStock);
+            stockSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchStock();
+            });
+            
+            clientSearchBtn.addEventListener('click', searchClients);
+            clientSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchClients();
+            });
+        }
+
+        // ==================== INICIALIZAÇÃO ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFirebaseData();
+            setupEventListeners();
+            updateDateTime();
+            
+            const today = new Date().toISOString().split('T')[0];
+            dueDateInput.setAttribute('min', today);
+            
+            reportPeriod.addEventListener('change', generateReport);
+            reportType.addEventListener('change', generateReport);
+        });
     </script>
 </body>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyD2WUGIT-4PoVKSJ6Smm2vhFwTh2uJiNh8",
+    authDomain: "controle-de-vendas-bf26d.firebaseapp.com",
+    databaseURL: "https://controle-de-vendas-bf26d-default-rtdb.firebaseio.com",
+    projectId: "controle-de-vendas-bf26d",
+    storageBucket: "controle-de-vendas-bf26d.firebasestorage.app",
+    messagingSenderId: "692750129361",
+    appId: "1:692750129361:web:0eba1efca9a99b29524df0",
+    measurementId: "G-TK09V8H5M6"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </html>
