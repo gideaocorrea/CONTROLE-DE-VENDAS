@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Control - PDV Completo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
@@ -558,7 +559,7 @@
                 <i class="fas fa-cog"></i>
             </div>
             <h2>Business Control</h2>
-            <div class="date-display">Segunda-feira, 25 de Setembro de 2023</div>
+            <div class="date-display">Carregando...</div>
         </div>
         
         <div class="content">
@@ -920,13 +921,14 @@
     <script>
         // ==================== CONFIGURAÇÃO FIREBASE ====================
         const firebaseConfig = {
-            apiKey: "AIzaSyDummyAPIKeyReplaceWithYours",
+            apiKey: "AIzaSyD2WUGIT-4PoVKSJ6Smm2vhFwTh2uJiNh8",
             authDomain: "controle-de-vendas-bf26d.firebaseapp.com",
             databaseURL: "https://controle-de-vendas-bf26d-default-rtdb.firebaseio.com",
             projectId: "controle-de-vendas-bf26d",
-            storageBucket: "controle-de-vendas-bf26d.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
+            storageBucket: "controle-de-vendas-bf26d.firebasestorage.app",
+            messagingSenderId: "692750129361",
+            appId: "1:692750129361:web:0eba1efca9a99b29524df0",
+            measurementId: "G-TK09V8H5M6"
         };
 
         // Inicializar Firebase
@@ -1017,16 +1019,28 @@
 
         // ==================== FUNÇÕES FIREBASE ====================
         function loadFirebaseData() {
+            console.log('🔥 Conectando ao Firebase...');
+            
             // Carregar produtos
             dbRef.products.on('value', (snapshot) => {
                 products = [];
                 const data = snapshot.val();
                 if (data) {
                     Object.keys(data).forEach(key => {
-                        products.push({ id: key, ...data[key] });
+                        products.push({ 
+                            id: key, 
+                            name: data[key].name || '',
+                            code: data[key].code || '',
+                            cost: data[key].cost || 0,
+                            price: data[key].price || 0,
+                            stock: data[key].stock || 0
+                        });
                     });
                 }
+                console.log(`📦 ${products.length} produtos carregados`);
                 loadProducts();
+            }, (error) => {
+                console.error('Erro ao carregar produtos:', error);
             });
 
             // Carregar clientes
@@ -1035,10 +1049,19 @@
                 const data = snapshot.val();
                 if (data) {
                     Object.keys(data).forEach(key => {
-                        clients.push({ id: key, ...data[key] });
+                        clients.push({ 
+                            id: key, 
+                            name: data[key].name || '',
+                            email: data[key].email || '',
+                            phone: data[key].phone || '',
+                            totalPurchases: data[key].totalPurchases || 0
+                        });
                     });
                 }
+                console.log(`👥 ${clients.length} clientes carregados`);
                 loadClients();
+            }, (error) => {
+                console.error('Erro ao carregar clientes:', error);
             });
 
             // Carregar recebíveis
@@ -1047,11 +1070,20 @@
                 const data = snapshot.val();
                 if (data) {
                     Object.keys(data).forEach(key => {
-                        receivables.push({ id: key, ...data[key] });
+                        receivables.push({ 
+                            id: key, 
+                            client: data[key].client || '',
+                            value: data[key].value || 0,
+                            dueDate: data[key].dueDate || '',
+                            status: data[key].status || 'pending'
+                        });
                     });
                 }
+                console.log(`💰 ${receivables.length} recebíveis carregados`);
                 loadReceivables();
                 updateDashboardReceivables();
+            }, (error) => {
+                console.error('Erro ao carregar recebíveis:', error);
             });
 
             // Carregar histórico de vendas
@@ -1060,12 +1092,23 @@
                 const data = snapshot.val();
                 if (data) {
                     Object.keys(data).forEach(key => {
-                        salesHistory.push({ id: key, ...data[key] });
+                        salesHistory.push({ 
+                            id: key, 
+                            date: data[key].date || '',
+                            clientId: data[key].clientId || '',
+                            clientName: data[key].clientName || '',
+                            items: data[key].items || [],
+                            total: data[key].total || 0,
+                            paymentMethod: data[key].paymentMethod || 'cash'
+                        });
                     });
                 }
+                console.log(`📊 ${salesHistory.length} vendas no histórico`);
                 updateSalesData();
                 updateTopProductsReport();
                 updateTopClientsReport();
+            }, (error) => {
+                console.error('Erro ao carregar histórico de vendas:', error);
             });
 
             // Carregar dados das vendas
@@ -1076,105 +1119,192 @@
                     sales.month = data.month || 0;
                     sales.goal = data.goal || 30000;
                 }
+                console.log('📈 Dados de vendas carregados');
                 updateDashboard();
+            }, (error) => {
+                console.error('Erro ao carregar dados de vendas:', error);
             });
         }
 
         function saveProductToFirebase(product) {
-            if (product.id && product.id.length > 2) {
-                return dbRef.products.child(product.id).update({
-                    name: product.name,
-                    code: product.code,
-                    cost: product.cost,
-                    price: product.price,
-                    stock: product.stock
-                });
-            } else {
-                return dbRef.products.push({
-                    name: product.name,
-                    code: product.code,
-                    cost: product.cost,
-                    price: product.price,
-                    stock: product.stock
-                });
-            }
+            return new Promise((resolve, reject) => {
+                try {
+                    if (product.id && product.id.length > 2) {
+                        // Atualizar produto existente
+                        dbRef.products.child(product.id).update({
+                            name: product.name,
+                            code: product.code,
+                            cost: parseFloat(product.cost) || 0,
+                            price: parseFloat(product.price) || 0,
+                            stock: parseInt(product.stock) || 0
+                        }, (error) => {
+                            if (error) {
+                                reject(error);
+                            } else {
+                                resolve(product.id);
+                            }
+                        });
+                    } else {
+                        // Criar novo produto
+                        const newProductRef = dbRef.products.push({
+                            name: product.name,
+                            code: product.code,
+                            cost: parseFloat(product.cost) || 0,
+                            price: parseFloat(product.price) || 0,
+                            stock: parseInt(product.stock) || 0
+                        }, (error) => {
+                            if (error) {
+                                reject(error);
+                            } else {
+                                resolve(newProductRef.key);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            });
         }
 
         function saveClientToFirebase(client) {
-            if (client.id && client.id.length > 2) {
-                return dbRef.clients.child(client.id).update({
-                    name: client.name,
-                    email: client.email,
-                    phone: client.phone,
-                    totalPurchases: client.totalPurchases || 0
-                });
-            } else {
-                return dbRef.clients.push({
-                    name: client.name,
-                    email: client.email,
-                    phone: client.phone,
-                    totalPurchases: 0
-                });
-            }
+            return new Promise((resolve, reject) => {
+                try {
+                    if (client.id && client.id.length > 2) {
+                        // Atualizar cliente existente
+                        dbRef.clients.child(client.id).update({
+                            name: client.name,
+                            email: client.email,
+                            phone: client.phone,
+                            totalPurchases: parseFloat(client.totalPurchases) || 0
+                        }, (error) => {
+                            if (error) {
+                                reject(error);
+                            } else {
+                                resolve(client.id);
+                            }
+                        });
+                    } else {
+                        // Criar novo cliente
+                        const newClientRef = dbRef.clients.push({
+                            name: client.name,
+                            email: client.email,
+                            phone: client.phone,
+                            totalPurchases: 0
+                        }, (error) => {
+                            if (error) {
+                                reject(error);
+                            } else {
+                                resolve(newClientRef.key);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            });
         }
 
         function saveSaleToFirebase(sale) {
-            const saleRef = dbRef.salesHistory.push({
-                date: sale.date,
-                clientId: sale.clientId,
-                clientName: sale.clientName,
-                items: sale.items,
-                total: sale.total,
-                paymentMethod: sale.paymentMethod
+            return new Promise((resolve, reject) => {
+                try {
+                    const saleRef = dbRef.salesHistory.push({
+                        date: sale.date,
+                        clientId: sale.clientId || null,
+                        clientName: sale.clientName || 'Cliente não identificado',
+                        items: sale.items.map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            price: parseFloat(item.price),
+                            quantity: parseInt(item.quantity)
+                        })),
+                        total: parseFloat(sale.total),
+                        paymentMethod: sale.paymentMethod
+                    }, (error) => {
+                        if (error) {
+                            reject(error);
+                        } else {
+                            resolve(saleRef.key);
+                        }
+                    });
+                } catch (error) {
+                    reject(error);
+                }
             });
-
-            const today = new Date().toDateString();
-            const saleDate = new Date(sale.date).toDateString();
-            
-            if (saleDate === today) {
-                sales.today += sale.total;
-            }
-            
-            sales.month += sale.total;
-            
-            dbRef.appData.child('sales').set({
-                today: sales.today,
-                month: sales.month,
-                goal: sales.goal
-            });
-
-            return saleRef;
         }
 
         function saveReceivableToFirebase(receivable) {
-            if (receivable.id && receivable.id.length > 2) {
-                return dbRef.receivables.child(receivable.id).update({
-                    client: receivable.client,
-                    value: receivable.value,
-                    dueDate: receivable.dueDate,
-                    status: receivable.status
-                });
-            } else {
-                return dbRef.receivables.push({
-                    client: receivable.client,
-                    value: receivable.value,
-                    dueDate: receivable.dueDate,
-                    status: 'pending'
-                });
-            }
+            return new Promise((resolve, reject) => {
+                try {
+                    if (receivable.id && receivable.id.length > 2) {
+                        // Atualizar recebível existente
+                        dbRef.receivables.child(receivable.id).update({
+                            client: receivable.client,
+                            value: parseFloat(receivable.value),
+                            dueDate: receivable.dueDate,
+                            status: receivable.status
+                        }, (error) => {
+                            if (error) {
+                                reject(error);
+                            } else {
+                                resolve(receivable.id);
+                            }
+                        });
+                    } else {
+                        // Criar novo recebível
+                        const newReceivableRef = dbRef.receivables.push({
+                            client: receivable.client,
+                            value: parseFloat(receivable.value),
+                            dueDate: receivable.dueDate,
+                            status: 'pending'
+                        }, (error) => {
+                            if (error) {
+                                reject(error);
+                            } else {
+                                resolve(newReceivableRef.key);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            });
         }
 
         function deleteProductFromFirebase(productId) {
-            return dbRef.products.child(productId).remove();
+            return new Promise((resolve, reject) => {
+                dbRef.products.child(productId).remove((error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
         }
 
         function deleteClientFromFirebase(clientId) {
-            return dbRef.clients.child(clientId).remove();
+            return new Promise((resolve, reject) => {
+                dbRef.clients.child(clientId).remove((error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
         }
 
         function updateStockInFirebase(productId, newStock) {
-            return dbRef.products.child(productId).update({
-                stock: newStock
+            return new Promise((resolve, reject) => {
+                dbRef.products.child(productId).update({
+                    stock: parseInt(newStock)
+                }, (error) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                });
             });
         }
 
@@ -1378,6 +1508,7 @@
                 }
             });
 
+            // Atualizar no Firebase
             dbRef.appData.child('sales').set({
                 today: sales.today,
                 month: sales.month,
@@ -1764,7 +1895,7 @@
             
             document.querySelectorAll('.increase').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const productId = parseInt(this.getAttribute('data-id'));
+                    const productId = this.getAttribute('data-id');
                     const cartItem = cart.find(item => item.id === productId);
                     
                     const product = products.find(p => p.id === productId);
@@ -1779,7 +1910,7 @@
             
             document.querySelectorAll('.decrease').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const productId = parseInt(this.getAttribute('data-id'));
+                    const productId = this.getAttribute('data-id');
                     const cartItem = cart.find(item => item.id === productId);
                     
                     if (cartItem.quantity > 1) {
@@ -1791,7 +1922,7 @@
             
             document.querySelectorAll('.quantity-input').forEach(input => {
                 input.addEventListener('change', function() {
-                    const productId = parseInt(this.getAttribute('data-id'));
+                    const productId = this.getAttribute('data-id');
                     const cartItem = cart.find(item => item.id === productId);
                     const newQuantity = parseInt(this.value) || 1;
                     
@@ -1808,7 +1939,7 @@
             
             document.querySelectorAll('.remove-item').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const productId = parseInt(this.getAttribute('data-id'));
+                    const productId = this.getAttribute('data-id');
                     cart = cart.filter(item => item.id !== productId);
                     updateCart();
                 });
@@ -1844,6 +1975,9 @@
         function deleteClient(clientId) {
             if (confirm('Tem certeza que deseja excluir este cliente?')) {
                 deleteClientFromFirebase(clientId)
+                    .then(() => {
+                        console.log('Cliente excluído com sucesso');
+                    })
                     .catch(error => {
                         console.error('Erro ao excluir cliente:', error);
                         alert('Erro ao excluir cliente. Tente novamente.');
@@ -1854,6 +1988,9 @@
         function deleteProduct(productId) {
             if (confirm('Tem certeza que deseja excluir este produto?')) {
                 deleteProductFromFirebase(productId)
+                    .then(() => {
+                        console.log('Produto excluído com sucesso');
+                    })
                     .catch(error => {
                         console.error('Erro ao excluir produto:', error);
                         alert('Erro ao excluir produto. Tente novamente.');
@@ -1866,7 +2003,14 @@
                 const receivable = receivables.find(r => r.id === receivableId);
                 if (receivable) {
                     receivable.status = 'paid';
-                    saveReceivableToFirebase(receivable);
+                    saveReceivableToFirebase(receivable)
+                        .then(() => {
+                            console.log('Recebível marcado como pago');
+                        })
+                        .catch(error => {
+                            console.error('Erro ao atualizar recebível:', error);
+                            alert('Erro ao atualizar recebível. Tente novamente.');
+                        });
                 }
             }
         }
@@ -2147,7 +2291,11 @@
                         status: 'pending'
                     };
 
-                    saveReceivableToFirebase(receivableData);
+                    saveReceivableToFirebase(receivableData)
+                        .catch(error => {
+                            console.error('Erro ao salvar recebível:', error);
+                            alert('Erro ao salvar recebível. Tente novamente.');
+                        });
                 }
 
                 const saleData = {
@@ -2163,22 +2311,33 @@
                     .then(() => {
                         if (client) {
                             client.totalPurchases = (client.totalPurchases || 0) + total;
-                            saveClientToFirebase(client);
+                            saveClientToFirebase(client)
+                                .catch(error => {
+                                    console.error('Erro ao atualizar cliente:', error);
+                                });
                         }
 
+                        const stockUpdates = [];
                         cart.forEach(cartItem => {
                             const product = products.find(p => p.id === cartItem.id);
                             if (product) {
                                 const newStock = product.stock - cartItem.quantity;
-                                updateStockInFirebase(product.id, newStock);
+                                stockUpdates.push(updateStockInFirebase(product.id, newStock));
                             }
                         });
 
-                        cart = [];
-                        updateCart();
-                        saleModal.style.display = 'none';
-                        clientSelect.value = '';
-                        alert('Venda finalizada com sucesso!');
+                        Promise.all(stockUpdates)
+                            .then(() => {
+                                cart = [];
+                                updateCart();
+                                saleModal.style.display = 'none';
+                                clientSelect.value = '';
+                                alert('Venda finalizada com sucesso!');
+                            })
+                            .catch(error => {
+                                console.error('Erro ao atualizar estoque:', error);
+                                alert('Venda finalizada, mas houve erro ao atualizar estoque.');
+                            });
                     })
                     .catch(error => {
                         console.error('Erro ao salvar venda:', error);
@@ -2219,6 +2378,7 @@
                 saveClientToFirebase(clientData)
                     .then(() => {
                         clientFormCard.style.display = 'none';
+                        alert('Cliente salvo com sucesso!');
                     })
                     .catch(error => {
                         console.error('Erro ao salvar cliente:', error);
@@ -2259,6 +2419,7 @@
                 saveProductToFirebase(productData)
                     .then(() => {
                         productFormCard.style.display = 'none';
+                        alert('Produto salvo com sucesso!');
                     })
                     .catch(error => {
                         console.error('Erro ao salvar produto:', error);
@@ -2284,40 +2445,20 @@
 
         // ==================== INICIALIZAÇÃO ====================
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Iniciando Business Control...');
             loadFirebaseData();
             setupEventListeners();
             updateDateTime();
             
             const today = new Date().toISOString().split('T')[0];
             dueDateInput.setAttribute('min', today);
+            dueDateInput.value = today;
             
             reportPeriod.addEventListener('change', generateReport);
             reportType.addEventListener('change', generateReport);
+            
+            console.log('✅ Business Control iniciado com sucesso!');
         });
     </script>
 </body>
-    <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyD2WUGIT-4PoVKSJ6Smm2vhFwTh2uJiNh8",
-    authDomain: "controle-de-vendas-bf26d.firebaseapp.com",
-    databaseURL: "https://controle-de-vendas-bf26d-default-rtdb.firebaseio.com",
-    projectId: "controle-de-vendas-bf26d",
-    storageBucket: "controle-de-vendas-bf26d.firebasestorage.app",
-    messagingSenderId: "692750129361",
-    appId: "1:692750129361:web:0eba1efca9a99b29524df0",
-    measurementId: "G-TK09V8H5M6"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 </html>
