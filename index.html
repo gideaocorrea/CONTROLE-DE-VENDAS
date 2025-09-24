@@ -1150,34 +1150,37 @@
             return salesDataRef.set(sales);
         }
 
-        function calculateSalesTotals() {
-            const today = new Date();
-            const todayString = today.toISOString().split('T')[0];
-            const month = today.getMonth();
-            const year = today.getFullYear();
+       function calculateSalesTotals() {
+    const today = new Date();
+    
+    // CORREÇÃO: Criar datas comparáveis (ignorando horário)
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    
+    const month = today.getMonth();
+    const year = today.getFullYear();
 
-            let todayTotal = 0;
-            let monthTotal = 0;
+    let todayTotal = 0;
+    let monthTotal = 0;
 
-            salesHistory.forEach(sale => {
-                const saleDate = new Date(sale.date);
-                const saleDateString = saleDate.toISOString().split('T')[0];
-                
-                if (saleDateString === todayString) {
-                    todayTotal += sale.total;
-                }
-                
-                if (saleDate.getMonth() === month && saleDate.getFullYear() === year) {
-                    monthTotal += sale.total;
-                }
-            });
-
-            sales.today = todayTotal;
-            sales.month = monthTotal;
-            
-            // Atualizar no Firebase
-            updateSalesData();
+    salesHistory.forEach(sale => {
+        const saleDate = new Date(sale.date);
+        
+        // CORREÇÃO: Comparar datas corretamente
+        if (saleDate >= todayStart && saleDate < todayEnd) {
+            todayTotal += sale.total;
         }
+        
+        if (saleDate.getMonth() === month && saleDate.getFullYear() === year) {
+            monthTotal += sale.total;
+        }
+    });
+
+    sales.today = todayTotal;
+    sales.month = monthTotal;
+    
+    updateSalesData();
+}
         
         // Carregar clientes nos selects e listas
         function loadClients() {
@@ -2409,5 +2412,6 @@
     </script>
 </body>
 </html>
+
 
 
