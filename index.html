@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Control - PDV Completo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- Adicionar Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
+        /* Seu CSS existente permanece igual */
         * {
             margin: 0;
             padding: 0;
@@ -465,6 +466,7 @@
             width: auto;
         }
         
+        /* NOVOS ESTILOS PARA OS RELATÓRIOS */
         .report-section {
             margin-top: 15px;
         }
@@ -535,16 +537,20 @@
             border-radius: 8px;
         }
 
+        /* Loading styles */
         .loading {
             text-align: center;
-            padding: 10px;
-            color: #2575fc;
+            padding: 20px;
+            color: #666;
         }
-
+        
         .loading i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
             animation: spin 1s linear infinite;
         }
-
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -559,7 +565,7 @@
                 <i class="fas fa-cog"></i>
             </div>
             <h2>Business Control</h2>
-            <div class="date-display">Carregando...</div>
+            <div class="date-display">Segunda-feira, 25 de Setembro de 2023</div>
         </div>
         
         <div class="content">
@@ -592,6 +598,7 @@
                     </div>
                 </div>
                 
+                <!-- NOVA SEÇÃO: PRODUTOS MAIS VENDIDOS -->
                 <div class="card">
                     <div class="card-title">
                         <span>Produtos Mais Vendidos</span>
@@ -600,11 +607,13 @@
                     
                     <div class="report-section" id="top-products-section">
                         <div class="loading">
-                            <i class="fas fa-spinner"></i> Carregando...
+                            <i class="fas fa-spinner"></i>
+                            <p>Carregando dados...</p>
                         </div>
                     </div>
                 </div>
                 
+                <!-- NOVA SEÇÃO: MELHORES CLIENTES -->
                 <div class="card">
                     <div class="card-title">
                         <span>Melhores Clientes</span>
@@ -613,7 +622,8 @@
                     
                     <div class="report-section" id="top-clients-section">
                         <div class="loading">
-                            <i class="fas fa-spinner"></i> Carregando...
+                            <i class="fas fa-spinner"></i>
+                            <p>Carregando dados...</p>
                         </div>
                     </div>
                 </div>
@@ -625,7 +635,8 @@
                     </div>
                     <div id="dashboard-receivables">
                         <div class="loading">
-                            <i class="fas fa-spinner"></i> Carregando...
+                            <i class="fas fa-spinner"></i>
+                            <p>Carregando recebimentos...</p>
                         </div>
                     </div>
                 </div>
@@ -647,7 +658,8 @@
                     <h3>Produtos Disponíveis</h3>
                     <ul class="product-list" id="product-list">
                         <div class="loading">
-                            <i class="fas fa-spinner"></i> Carregando produtos...
+                            <i class="fas fa-spinner"></i>
+                            <p>Carregando produtos...</p>
                         </div>
                     </ul>
                 </div>
@@ -673,6 +685,7 @@
                         <label for="client-select">Cliente</label>
                         <select id="client-select" class="form-control">
                             <option value="">Selecionar cliente...</option>
+                            <!-- Clientes carregados via JavaScript -->
                         </select>
                     </div>
                     
@@ -695,7 +708,8 @@
                     
                     <ul class="product-list" id="stock-list">
                         <div class="loading">
-                            <i class="fas fa-spinner"></i> Carregando estoque...
+                            <i class="fas fa-spinner"></i>
+                            <p>Carregando estoque...</p>
                         </div>
                     </ul>
                     
@@ -754,7 +768,8 @@
                     
                     <ul class="client-list" id="client-list">
                         <div class="loading">
-                            <i class="fas fa-spinner"></i> Carregando clientes...
+                            <i class="fas fa-spinner"></i>
+                            <p>Carregando clientes...</p>
                         </div>
                     </ul>
                     
@@ -800,7 +815,8 @@
                     
                     <ul class="client-list" id="receivables-list">
                         <div class="loading">
-                            <i class="fas fa-spinner"></i> Carregando recebíveis...
+                            <i class="fas fa-spinner"></i>
+                            <p>Carregando recebíveis...</p>
                         </div>
                     </ul>
                     
@@ -821,7 +837,7 @@
                 </div>
             </div>
             
-            <!-- Relatórios Tab -->
+            <!-- NOVA ABA: Relatórios -->
             <div class="tab-content" id="reports">
                 <div class="card">
                     <div class="card-title">
@@ -845,8 +861,8 @@
                     </div>
                     
                     <div id="detailed-report">
-                        <div class="loading">
-                            <i class="fas fa-spinner"></i> Carregando relatórios...
+                        <div class="empty-cart">
+                            <p>Selecione o tipo de relatório</p>
                         </div>
                     </div>
                 </div>
@@ -919,7 +935,7 @@
     </div>
 
     <script>
-        // ==================== CONFIGURAÇÃO FIREBASE ====================
+        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD2WUGIT-4PoVKSJ6Smm2vhFwTh2uJiNh8",
             authDomain: "controle-de-vendas-bf26d.firebaseapp.com",
@@ -936,16 +952,14 @@
         const database = firebase.database();
 
         // Referências do Firebase
-        const dbRef = {
-            products: database.ref('products'),
-            clients: database.ref('clients'),
-            sales: database.ref('sales'),
-            receivables: database.ref('receivables'),
-            salesHistory: database.ref('salesHistory'),
-            appData: database.ref('appData')
-        };
+        const clientsRef = database.ref('clients');
+        const productsRef = database.ref('products');
+        const salesRef = database.ref('sales');
+        const receivablesRef = database.ref('receivables');
+        const salesHistoryRef = database.ref('salesHistory');
+        const salesDataRef = database.ref('salesData');
 
-        // ==================== DADOS DA APLICAÇÃO ====================
+        // Dados da aplicação (cache local)
         let cart = [];
         let total = 0;
         let clients = [];
@@ -953,13 +967,14 @@
         let receivables = [];
         let salesHistory = [];
         
+        // Dados de vendas para dashboard
         let sales = {
             today: 0,
             month: 0,
-            goal: 30000
+            goal: 30000 // Meta mensal de R$ 30.000
         };
-
-        // ==================== ELEMENTOS DO DOM ====================
+        
+        // Elementos do DOM
         const productList = document.getElementById('product-list');
         const stockList = document.getElementById('stock-list');
         const cartItems = document.getElementById('cart-items');
@@ -1011,362 +1026,225 @@
         const toReceiveValueElement = document.getElementById('to-receive-value');
         const overdueValueElement = document.getElementById('overdue-value');
         const totalReceivablesElement = document.getElementById('total-receivables');
+        
+        // NOVOS ELEMENTOS: Relatórios
         const topProductsSection = document.getElementById('top-products-section');
         const topClientsSection = document.getElementById('top-clients-section');
         const reportPeriod = document.getElementById('report-period');
         const reportType = document.getElementById('report-type');
         const detailedReport = document.getElementById('detailed-report');
-
-        // ==================== FUNÇÕES FIREBASE ====================
-        function loadFirebaseData() {
-            console.log('🔥 Conectando ao Firebase...');
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar dados do Firebase
+            loadFirebaseData();
+            setupEventListeners();
+            updateDateTime();
             
-            // Carregar produtos
-            dbRef.products.on('value', (snapshot) => {
-                products = [];
+            // Definir data mínima para o datepicker (hoje)
+            const today = new Date().toISOString().split('T')[0];
+            dueDateInput.setAttribute('min', today);
+            
+            // Adicionar event listeners para os relatórios
+            reportPeriod.addEventListener('change', generateReport);
+            reportType.addEventListener('change', generateReport);
+        });
+
+        // Funções do Firebase
+        function loadFirebaseData() {
+            // Carregar clientes
+            clientsRef.on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        products.push({ 
-                            id: key, 
-                            name: data[key].name || '',
-                            code: data[key].code || '',
-                            cost: data[key].cost || 0,
-                            price: data[key].price || 0,
-                            stock: data[key].stock || 0
-                        });
-                    });
-                }
-                console.log(`📦 ${products.length} produtos carregados`);
-                loadProducts();
-            }, (error) => {
-                console.error('Erro ao carregar produtos:', error);
+                clients = data ? Object.values(data) : [];
+                loadClients();
+                updateDashboard();
             });
 
-            // Carregar clientes
-            dbRef.clients.on('value', (snapshot) => {
-                clients = [];
+            // Carregar produtos
+            productsRef.on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        clients.push({ 
-                            id: key, 
-                            name: data[key].name || '',
-                            email: data[key].email || '',
-                            phone: data[key].phone || '',
-                            totalPurchases: data[key].totalPurchases || 0
-                        });
-                    });
-                }
-                console.log(`👥 ${clients.length} clientes carregados`);
-                loadClients();
-            }, (error) => {
-                console.error('Erro ao carregar clientes:', error);
+                products = data ? Object.values(data) : [];
+                loadProducts();
+                updateDashboard();
             });
 
             // Carregar recebíveis
-            dbRef.receivables.on('value', (snapshot) => {
-                receivables = [];
+            receivablesRef.on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        receivables.push({ 
-                            id: key, 
-                            client: data[key].client || '',
-                            value: data[key].value || 0,
-                            dueDate: data[key].dueDate || '',
-                            status: data[key].status || 'pending'
-                        });
-                    });
-                }
-                console.log(`💰 ${receivables.length} recebíveis carregados`);
+                receivables = data ? Object.values(data) : [];
                 loadReceivables();
-                updateDashboardReceivables();
-            }, (error) => {
-                console.error('Erro ao carregar recebíveis:', error);
+                updateDashboard();
             });
 
             // Carregar histórico de vendas
-            dbRef.salesHistory.on('value', (snapshot) => {
-                salesHistory = [];
+            salesHistoryRef.on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        salesHistory.push({ 
-                            id: key, 
-                            date: data[key].date || '',
-                            clientId: data[key].clientId || '',
-                            clientName: data[key].clientName || '',
-                            items: data[key].items || [],
-                            total: data[key].total || 0,
-                            paymentMethod: data[key].paymentMethod || 'cash'
-                        });
-                    });
-                }
-                console.log(`📊 ${salesHistory.length} vendas no histórico`);
-                updateSalesData();
-                updateTopProductsReport();
-                updateTopClientsReport();
-            }, (error) => {
-                console.error('Erro ao carregar histórico de vendas:', error);
+                salesHistory = data ? Object.values(data) : [];
+                updateDashboard();
+                calculateSalesTotals();
             });
 
-            // Carregar dados das vendas
-            dbRef.appData.child('sales').on('value', (snapshot) => {
+            // Carregar dados de vendas
+            salesDataRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     sales.today = data.today || 0;
                     sales.month = data.month || 0;
                     sales.goal = data.goal || 30000;
-                }
-                console.log('📈 Dados de vendas carregados');
-                updateDashboard();
-            }, (error) => {
-                console.error('Erro ao carregar dados de vendas:', error);
-            });
-        }
-
-        function saveProductToFirebase(product) {
-            return new Promise((resolve, reject) => {
-                try {
-                    if (product.id && product.id.length > 2) {
-                        // Atualizar produto existente
-                        dbRef.products.child(product.id).update({
-                            name: product.name,
-                            code: product.code,
-                            cost: parseFloat(product.cost) || 0,
-                            price: parseFloat(product.price) || 0,
-                            stock: parseInt(product.stock) || 0
-                        }, (error) => {
-                            if (error) {
-                                reject(error);
-                            } else {
-                                resolve(product.id);
-                            }
-                        });
-                    } else {
-                        // Criar novo produto
-                        const newProductRef = dbRef.products.push({
-                            name: product.name,
-                            code: product.code,
-                            cost: parseFloat(product.cost) || 0,
-                            price: parseFloat(product.price) || 0,
-                            stock: parseInt(product.stock) || 0
-                        }, (error) => {
-                            if (error) {
-                                reject(error);
-                            } else {
-                                resolve(newProductRef.key);
-                            }
-                        });
-                    }
-                } catch (error) {
-                    reject(error);
+                    updateDashboard();
                 }
             });
         }
 
         function saveClientToFirebase(client) {
-            return new Promise((resolve, reject) => {
-                try {
-                    if (client.id && client.id.length > 2) {
-                        // Atualizar cliente existente
-                        dbRef.clients.child(client.id).update({
-                            name: client.name,
-                            email: client.email,
-                            phone: client.phone,
-                            totalPurchases: parseFloat(client.totalPurchases) || 0
-                        }, (error) => {
-                            if (error) {
-                                reject(error);
-                            } else {
-                                resolve(client.id);
-                            }
-                        });
-                    } else {
-                        // Criar novo cliente
-                        const newClientRef = dbRef.clients.push({
-                            name: client.name,
-                            email: client.email,
-                            phone: client.phone,
-                            totalPurchases: 0
-                        }, (error) => {
-                            if (error) {
-                                reject(error);
-                            } else {
-                                resolve(newClientRef.key);
-                            }
-                        });
-                    }
-                } catch (error) {
-                    reject(error);
-                }
-            });
+            if (client.id) {
+                // Atualizar cliente existente
+                return clientsRef.child(client.id).set(client);
+            } else {
+                // Criar novo cliente
+                const newId = clientsRef.push().key;
+                client.id = newId;
+                return clientsRef.child(newId).set(client);
+            }
         }
 
-        function saveSaleToFirebase(sale) {
-            return new Promise((resolve, reject) => {
-                try {
-                    const saleRef = dbRef.salesHistory.push({
-                        date: sale.date,
-                        clientId: sale.clientId || null,
-                        clientName: sale.clientName || 'Cliente não identificado',
-                        items: sale.items.map(item => ({
-                            id: item.id,
-                            name: item.name,
-                            price: parseFloat(item.price),
-                            quantity: parseInt(item.quantity)
-                        })),
-                        total: parseFloat(sale.total),
-                        paymentMethod: sale.paymentMethod
-                    }, (error) => {
-                        if (error) {
-                            reject(error);
-                        } else {
-                            resolve(saleRef.key);
-                        }
-                    });
-                } catch (error) {
-                    reject(error);
-                }
-            });
+        function deleteClientFromFirebase(id) {
+            return clientsRef.child(id).remove();
+        }
+
+        function saveProductToFirebase(product) {
+            if (product.id) {
+                // Atualizar produto existente
+                return productsRef.child(product.id).set(product);
+            } else {
+                // Criar novo produto
+                const newId = productsRef.push().key;
+                product.id = newId;
+                return productsRef.child(newId).set(product);
+            }
+        }
+
+        function deleteProductFromFirebase(id) {
+            return productsRef.child(id).remove();
         }
 
         function saveReceivableToFirebase(receivable) {
-            return new Promise((resolve, reject) => {
-                try {
-                    if (receivable.id && receivable.id.length > 2) {
-                        // Atualizar recebível existente
-                        dbRef.receivables.child(receivable.id).update({
-                            client: receivable.client,
-                            value: parseFloat(receivable.value),
-                            dueDate: receivable.dueDate,
-                            status: receivable.status
-                        }, (error) => {
-                            if (error) {
-                                reject(error);
-                            } else {
-                                resolve(receivable.id);
-                            }
-                        });
-                    } else {
-                        // Criar novo recebível
-                        const newReceivableRef = dbRef.receivables.push({
-                            client: receivable.client,
-                            value: parseFloat(receivable.value),
-                            dueDate: receivable.dueDate,
-                            status: 'pending'
-                        }, (error) => {
-                            if (error) {
-                                reject(error);
-                            } else {
-                                resolve(newReceivableRef.key);
-                            }
-                        });
-                    }
-                } catch (error) {
-                    reject(error);
+            if (receivable.id) {
+                // Atualizar recebível existente
+                return receivablesRef.child(receivable.id).set(receivable);
+            } else {
+                // Criar novo recebível
+                const newId = receivablesRef.push().key;
+                receivable.id = newId;
+                return receivablesRef.child(newId).set(receivable);
+            }
+        }
+
+        function saveSaleToHistory(sale) {
+            const newId = salesHistoryRef.push().key;
+            sale.id = newId;
+            return salesHistoryRef.child(newId).set(sale);
+        }
+
+        function updateSalesData() {
+            return salesDataRef.set(sales);
+        }
+
+        function calculateSalesTotals() {
+            const today = new Date();
+            const todayString = today.toISOString().split('T')[0];
+            const month = today.getMonth();
+            const year = today.getFullYear();
+
+            let todayTotal = 0;
+            let monthTotal = 0;
+
+            salesHistory.forEach(sale => {
+                const saleDate = new Date(sale.date);
+                const saleDateString = saleDate.toISOString().split('T')[0];
+                
+                if (saleDateString === todayString) {
+                    todayTotal += sale.total;
+                }
+                
+                if (saleDate.getMonth() === month && saleDate.getFullYear() === year) {
+                    monthTotal += sale.total;
                 }
             });
-        }
 
-        function deleteProductFromFirebase(productId) {
-            return new Promise((resolve, reject) => {
-                dbRef.products.child(productId).remove((error) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
-                });
-            });
+            sales.today = todayTotal;
+            sales.month = monthTotal;
+            
+            // Atualizar no Firebase
+            updateSalesData();
         }
-
-        function deleteClientFromFirebase(clientId) {
-            return new Promise((resolve, reject) => {
-                dbRef.clients.child(clientId).remove((error) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
-                });
-            });
-        }
-
-        function updateStockInFirebase(productId, newStock) {
-            return new Promise((resolve, reject) => {
-                dbRef.products.child(productId).update({
-                    stock: parseInt(newStock)
-                }, (error) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
-                });
-            });
-        }
-
-        // ==================== FUNÇÕES ORIGINAIS COMPLETAS ====================
+        
+        // Carregar clientes nos selects e listas
         function loadClients() {
+            // Limpar selects e listas
             clientSelect.innerHTML = '<option value="">Selecionar cliente...</option>';
             clientList.innerHTML = '';
-
-            if (clients.length === 0) {
-                clientList.innerHTML = '<div class="empty-cart"><p>Nenhum cliente cadastrado</p></div>';
-                return;
-            }
-
+            
+            // Adicionar clientes ao select
             clients.forEach(client => {
                 const option = document.createElement('option');
                 option.value = client.id;
                 option.textContent = client.name;
                 clientSelect.appendChild(option);
-
-                const li = document.createElement('li');
-                li.className = 'client-item';
-                li.innerHTML = `
-                    <div class="client-info">
-                        <strong>${client.name}</strong>
-                        <div>${client.email} | ${client.phone}</div>
-                        <div>Total em compras: R$ ${(client.totalPurchases || 0).toFixed(2)}</div>
-                    </div>
-                    <div class="client-actions">
-                        <i class="fas fa-edit edit-client" data-id="${client.id}"></i>
-                        <i class="fas fa-trash delete-client" data-id="${client.id}"></i>
-                    </div>
-                `;
-                clientList.appendChild(li);
             });
-
-            document.querySelectorAll('.edit-client').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const clientId = this.getAttribute('data-id');
-                    editClient(clientId);
+            
+            // Adicionar clientes à lista
+            if (clients.length === 0) {
+                clientList.innerHTML = '<div class="empty-cart"><p>Nenhum cliente cadastrado</p></div>';
+            } else {
+                clients.forEach(client => {
+                    const li = document.createElement('li');
+                    li.className = 'client-item';
+                    li.innerHTML = `
+                        <div class="client-info">
+                            <strong>${client.name}</strong>
+                            <div>${client.email} | ${client.phone}</div>
+                            <div>Total em compras: R$ ${(client.totalPurchases || 0).toFixed(2)}</div>
+                        </div>
+                        <div class="client-actions">
+                            <i class="fas fa-edit edit-client" data-id="${client.id}"></i>
+                            <i class="fas fa-trash delete-client" data-id="${client.id}"></i>
+                        </div>
+                    `;
+                    clientList.appendChild(li);
                 });
-            });
-
-            document.querySelectorAll('.delete-client').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const clientId = this.getAttribute('data-id');
-                    deleteClient(clientId);
+                
+                // Adicionar event listeners para editar e excluir
+                document.querySelectorAll('.edit-client').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const clientId = this.getAttribute('data-id');
+                        editClient(clientId);
+                    });
                 });
-            });
+                
+                document.querySelectorAll('.delete-client').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const clientId = this.getAttribute('data-id');
+                        deleteClient(clientId);
+                    });
+                });
+            }
         }
-
+        
+        // Carregar produtos
         function loadProducts() {
             productList.innerHTML = '';
             stockList.innerHTML = '';
-
+            
             if (products.length === 0) {
                 productList.innerHTML = '<div class="empty-cart"><p>Nenhum produto cadastrado</p></div>';
                 stockList.innerHTML = '<div class="empty-cart"><p>Nenhum produto cadastrado</p></div>';
                 return;
             }
-
+            
+            // Adicionar produtos à lista do PDV
             products.forEach(product => {
                 const li = document.createElement('li');
                 li.className = 'product-item';
@@ -1382,7 +1260,8 @@
                 `;
                 productList.appendChild(li);
             });
-
+            
+            // Adicionar produtos à lista de estoque
             products.forEach(product => {
                 const li = document.createElement('li');
                 li.className = 'product-item';
@@ -1402,7 +1281,8 @@
                 `;
                 stockList.appendChild(li);
             });
-
+            
+            // Adicionar event listeners para editar e excluir produtos
             document.querySelectorAll('.edit-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1410,7 +1290,7 @@
                     editProduct(productId);
                 });
             });
-
+            
             document.querySelectorAll('.delete-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1419,15 +1299,17 @@
                 });
             });
         }
-
+        
+        // Calcular margem de lucro
         function calculateMargin(cost, price) {
             if (cost === 0) return 100;
             return (((price - cost) / cost) * 100).toFixed(2);
         }
-
+        
+        // Carregar vendas a receber
         function loadReceivables() {
             receivablesList.innerHTML = '';
-
+            
             if (receivables.length === 0) {
                 receivablesList.innerHTML = '<div class="empty-cart"><p>Nenhuma venda a receber</p></div>';
                 toReceiveValueElement.textContent = 'R$ 0,00';
@@ -1435,17 +1317,18 @@
                 totalReceivablesElement.textContent = 'R$ 0,00';
                 return;
             }
-
+            
             let toReceiveTotal = 0;
             let overdueTotal = 0;
             let totalReceivables = 0;
-
+            
             receivables.forEach(item => {
+                // Verificar status
                 const today = new Date();
                 const dueDate = new Date(item.dueDate);
                 let status = 'pending';
                 let statusClass = 'pending';
-
+                
                 if (item.status === 'paid') {
                     status = 'paid';
                     statusClass = 'paid';
@@ -1456,11 +1339,12 @@
                 } else {
                     toReceiveTotal += item.value;
                 }
-
+                
                 totalReceivables += item.value;
-
+                
+                // Formatar data
                 const formattedDate = dueDate.toLocaleDateString('pt-BR');
-
+                
                 const li = document.createElement('li');
                 li.className = 'client-item';
                 li.innerHTML = `
@@ -1477,11 +1361,13 @@
                 `;
                 receivablesList.appendChild(li);
             });
-
+            
+            // Atualizar totais
             toReceiveValueElement.textContent = `R$ ${toReceiveTotal.toFixed(2)}`;
             overdueValueElement.textContent = `R$ ${overdueTotal.toFixed(2)}`;
             totalReceivablesElement.textContent = `R$ ${totalReceivables.toFixed(2)}`;
-
+            
+            // Adicionar event listeners para o botão de receber
             document.querySelectorAll('.receive-payment').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const receivableId = this.getAttribute('data-id');
@@ -1489,49 +1375,31 @@
                 });
             });
         }
-
-        function updateSalesData() {
-            const today = new Date().toDateString();
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
-
-            sales.today = 0;
-            sales.month = 0;
-
-            salesHistory.forEach(sale => {
-                const saleDate = new Date(sale.date);
-                if (saleDate.toDateString() === today) {
-                    sales.today += sale.total;
-                }
-                if (saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear) {
-                    sales.month += sale.total;
-                }
-            });
-
-            // Atualizar no Firebase
-            dbRef.appData.child('sales').set({
-                today: sales.today,
-                month: sales.month,
-                goal: sales.goal
-            });
-        }
-
+        
+        // Atualizar dashboard
         function updateDashboard() {
+            // Atualizar vendas
             todaySalesElement.textContent = `R$ ${sales.today.toFixed(2)}`;
             monthSalesElement.textContent = `R$ ${sales.month.toFixed(2)}`;
             
+            // Calcular porcentagem da meta
             const goalPercentage = sales.month > 0 ? Math.min(100, (sales.month / sales.goal) * 100) : 0;
             goalPercentageElement.textContent = `${goalPercentage.toFixed(0)}%`;
             goalProgressElement.style.width = `${goalPercentage}%`;
             
+            // Atualizar recebíveis no dashboard
             updateDashboardReceivables();
+            
+            // Atualizar relatórios
             updateTopProductsReport();
             updateTopClientsReport();
         }
-
+        
+        // Atualizar recebíveis no dashboard
         function updateDashboardReceivables() {
             dashboardReceivables.innerHTML = '';
             
+            // Filtrar apenas recebíveis pendentes e vencidos
             const pendingReceivables = receivables.filter(item => {
                 if (item.status === 'paid') return false;
                 
@@ -1539,6 +1407,7 @@
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 
+                // Mostrar apenas os que vencem nos próximos 7 dias ou estão atrasados
                 const diffTime = dueDate.getTime() - today.getTime();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
@@ -1550,8 +1419,10 @@
                 return;
             }
             
+            // Ordenar por data de vencimento (mais próximos primeiro)
             pendingReceivables.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
             
+            // Mostrar apenas os 3 mais próximos
             const recentReceivables = pendingReceivables.slice(0, 3);
             
             recentReceivables.forEach(item => {
@@ -1584,8 +1455,10 @@
                 dashboardReceivables.appendChild(saleItem);
             });
         }
-
+        
+        // NOVA FUNÇÃO: Atualizar relatório de produtos mais vendidos
         function updateTopProductsReport() {
+            // Calcular totais de vendas por produto
             const productSales = {};
             
             salesHistory.forEach(sale => {
@@ -1604,10 +1477,12 @@
                 });
             });
             
+            // Converter para array e ordenar por quantidade vendida
             const topProducts = Object.values(productSales)
                 .sort((a, b) => b.quantity - a.quantity)
-                .slice(0, 5);
+                .slice(0, 5); // Top 5 produtos
             
+            // Atualizar a interface
             topProductsSection.innerHTML = '';
             
             if (topProducts.length === 0) {
@@ -1625,13 +1500,16 @@
                 topProductsSection.appendChild(itemElement);
             });
         }
-
+        
+        // NOVA FUNÇÃO: Atualizar relatório de melhores clientes
         function updateTopClientsReport() {
+            // Ordenar clientes por valor total de compras
             const topClients = [...clients]
-                .filter(client => client.totalPurchases > 0)
-                .sort((a, b) => b.totalPurchases - a.totalPurchases)
-                .slice(0, 5);
+                .filter(client => (client.totalPurchases || 0) > 0)
+                .sort((a, b) => (b.totalPurchases || 0) - (a.totalPurchases || 0))
+                .slice(0, 5); // Top 5 clientes
             
+            // Atualizar a interface
             topClientsSection.innerHTML = '';
             
             if (topClients.length === 0) {
@@ -1644,18 +1522,20 @@
                 itemElement.className = 'report-item';
                 itemElement.innerHTML = `
                     <div class="report-item-name">${index + 1}. ${client.name}</div>
-                    <div class="report-item-value">R$ ${client.totalPurchases.toFixed(2)}</div>
+                    <div class="report-item-value">R$ ${(client.totalPurchases || 0).toFixed(2)}</div>
                 `;
                 topClientsSection.appendChild(itemElement);
             });
         }
-
+        
+        // NOVA FUNÇÃO: Gerar relatório detalhado
         function generateReport() {
             const period = reportPeriod.value;
             const type = reportType.value;
             
             detailedReport.innerHTML = '';
             
+            // Filtrar vendas pelo período selecionado
             let filteredSales = [];
             const today = new Date();
             
@@ -1695,6 +1575,7 @@
                 return;
             }
             
+            // Gerar relatório com base no tipo selecionado
             if (type === 'products') {
                 generateProductReport(filteredSales);
             } else if (type === 'clients') {
@@ -1703,7 +1584,8 @@
                 generateSalesReport(filteredSales);
             }
         }
-
+        
+        // NOVA FUNÇÃO: Gerar relatório de produtos
         function generateProductReport(sales) {
             const productSales = {};
             
@@ -1751,7 +1633,8 @@
             
             detailedReport.innerHTML = reportHTML;
         }
-
+        
+        // NOVA FUNÇÃO: Gerar relatório de clientes
         function generateClientReport(sales) {
             const clientSales = {};
             
@@ -1799,7 +1682,8 @@
             
             detailedReport.innerHTML = reportHTML;
         }
-
+        
+        // NOVA FUNÇÃO: Gerar relatório de vendas
         function generateSalesReport(sales) {
             const dailySales = {};
             
@@ -1849,7 +1733,336 @@
             
             detailedReport.innerHTML = reportHTML;
         }
-
+        
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Navegação por abas
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const tab = this.getAttribute('data-tab');
+                    
+                    // Ativar aba clicada
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Mostrar conteúdo correspondente
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tab).classList.add('active');
+                    
+                    // Se for a aba de relatórios, gerar o relatório
+                    if (tab === 'reports') {
+                        generateReport();
+                    }
+                });
+            });
+            
+            // Adicionar produto ao carrinho
+            productList.addEventListener('click', function(e) {
+                const productItem = e.target.closest('.product-item');
+                if (productItem) {
+                    const productId = productItem.getAttribute('data-id');
+                    const productName = productItem.getAttribute('data-name');
+                    const productPrice = parseFloat(productItem.getAttribute('data-price'));
+                    
+                    // Verificar se o produto já está no carrinho
+                    const existingItem = cart.find(item => item.id === productId);
+                    
+                    if (existingItem) {
+                        // Verificar se há estoque disponível
+                        const product = products.find(p => p.id === productId);
+                        if (existingItem.quantity < product.stock) {
+                            existingItem.quantity++;
+                        } else {
+                            alert('Estoque insuficiente para este produto!');
+                        }
+                    } else {
+                        // Verificar se há estoque disponível
+                        const product = products.find(p => p.id === productId);
+                        if (product.stock > 0) {
+                            cart.push({
+                                id: productId,
+                                name: productName,
+                                price: productPrice,
+                                quantity: 1
+                            });
+                        } else {
+                            alert('Produto sem estoque disponível!');
+                        }
+                    }
+                    
+                    updateCart();
+                }
+            });
+            
+            // Finalizar venda
+            finalizeSaleBtn.addEventListener('click', function() {
+                if (cart.length === 0) return;
+                
+                // Criar resumo da venda
+                let summaryHTML = '<div class="sale-summary">';
+                cart.forEach(item => {
+                    summaryHTML += `
+                        <div class="sale-item">
+                            <div class="sale-info">${item.name} x ${item.quantity}</div>
+                            <div class="sale-value">R$ ${(item.price * item.quantity).toFixed(2)}</div>
+                        </div>
+                    `;
+                });
+                summaryHTML += `
+                    <div class="cart-total">
+                        Total: R$ ${total.toFixed(2)}
+                    </div>
+                `;
+                
+                // Adicionar informações do cliente se selecionado
+                const clientId = clientSelect.value;
+                if (clientId) {
+                    const client = clients.find(c => c.id === clientId);
+                    summaryHTML += `<p><strong>Cliente:</strong> ${client.name}</p>`;
+                }
+                
+                summaryHTML += '</div>';
+                
+                saleSummary.innerHTML = summaryHTML;
+                
+                // Mostrar modal
+                saleModal.style.display = 'flex';
+            });
+            
+            // Opções de pagamento
+            cashOption.addEventListener('click', function() {
+                cashOption.classList.add('active');
+                termOption.classList.remove('active');
+                document.querySelector('input[name="payment-method"][value="cash"]').checked = true;
+                dueDateContainer.style.display = 'none';
+            });
+            
+            termOption.addEventListener('click', function() {
+                termOption.classList.add('active');
+                cashOption.classList.remove('active');
+                document.querySelector('input[name="payment-method"][value="term"]').checked = true;
+                dueDateContainer.style.display = 'block';
+            });
+            
+            // Confirmar venda
+            confirmSaleBtn.addEventListener('click', function() {
+                const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+                const clientId = clientSelect.value;
+                const clientName = clientId ? clients.find(c => c.id === clientId).name : 'Cliente não identificado';
+                
+                if (paymentMethod === 'term') {
+                    const dueDate = dueDateInput.value;
+                    if (!dueDate) {
+                        alert('Por favor, selecione uma data de vencimento para vendas a prazo.');
+                        return;
+                    }
+                    
+                    // Adicionar à lista de recebíveis
+                    const receivable = {
+                        client: clientName,
+                        value: total,
+                        dueDate: dueDate,
+                        status: 'pending'
+                    };
+                    
+                    saveReceivableToFirebase(receivable)
+                        .catch(error => {
+                            console.error('Erro ao salvar recebível:', error);
+                            alert('Erro ao salvar recebível!');
+                        });
+                }
+                
+                // Registrar venda no histórico
+                const saleDate = new Date().toISOString();
+                const sale = {
+                    date: saleDate,
+                    clientId: clientId,
+                    clientName: clientName,
+                    items: [...cart],
+                    total: total,
+                    paymentMethod: paymentMethod
+                };
+                
+                saveSaleToHistory(sale)
+                    .then(() => {
+                        // Atualizar total de compras do cliente
+                        if (clientId) {
+                            const client = clients.find(c => c.id === clientId);
+                            if (client) {
+                                client.totalPurchases = (client.totalPurchases || 0) + total;
+                                saveClientToFirebase(client);
+                            }
+                        }
+                        
+                        // Atualizar estoque
+                        updateStockAfterSale();
+                        
+                        // Limpar carrinho
+                        cart = [];
+                        updateCart();
+                        
+                        // Fechar modal
+                        saleModal.style.display = 'none';
+                        
+                        // Resetar seleção de cliente
+                        clientSelect.value = '';
+                        
+                        alert('Venda finalizada com sucesso!');
+                    })
+                    .catch(error => {
+                        console.error('Erro ao salvar venda:', error);
+                        alert('Erro ao finalizar venda!');
+                    });
+            });
+            
+            // Cancelar venda
+            cancelSaleBtn.addEventListener('click', function() {
+                saleModal.style.display = 'none';
+            });
+            
+            // Clientes - Adicionar/Editar
+            addClientBtn.addEventListener('click', function() {
+                clientFormTitle.textContent = 'Novo Cliente';
+                clientIdInput.value = '';
+                clientNameInput.value = '';
+                clientEmailInput.value = '';
+                clientPhoneInput.value = '';
+                clientFormCard.style.display = 'block';
+            });
+            
+            cancelClientBtn.addEventListener('click', function() {
+                clientFormCard.style.display = 'none';
+            });
+            
+            saveClientBtn.addEventListener('click', function() {
+                const id = clientIdInput.value;
+                const name = clientNameInput.value;
+                const email = clientEmailInput.value;
+                const phone = clientPhoneInput.value;
+                
+                if (!name) {
+                    alert('Por favor, preencha o nome do cliente.');
+                    return;
+                }
+                
+                const clientData = {
+                    name,
+                    email,
+                    phone,
+                    totalPurchases: 0
+                };
+                
+                if (id) {
+                    // Preservar o total de compras ao editar
+                    const existingClient = clients.find(c => c.id === id);
+                    if (existingClient) {
+                        clientData.totalPurchases = existingClient.totalPurchases || 0;
+                    }
+                    
+                    clientData.id = id;
+                    saveClientToFirebase(clientData)
+                        .then(() => {
+                            clientFormCard.style.display = 'none';
+                        })
+                        .catch(error => {
+                            console.error('Erro ao atualizar cliente:', error);
+                            alert('Erro ao atualizar cliente!');
+                        });
+                } else {
+                    saveClientToFirebase(clientData)
+                        .then(() => {
+                            clientFormCard.style.display = 'none';
+                        })
+                        .catch(error => {
+                            console.error('Erro ao adicionar cliente:', error);
+                            alert('Erro ao adicionar cliente!');
+                        });
+                }
+            });
+            
+            // Produtos - Adicionar/Editar
+            addProductBtn.addEventListener('click', function() {
+                productFormTitle.textContent = 'Novo Produto';
+                productIdInput.value = '';
+                productNameInput.value = '';
+                productCodeInput.value = '';
+                productCostInput.value = '';
+                productPriceInput.value = '';
+                productStockInput.value = '';
+                productFormCard.style.display = 'block';
+            });
+            
+            cancelProductBtn.addEventListener('click', function() {
+                productFormCard.style.display = 'none';
+            });
+            
+            saveProductBtn.addEventListener('click', function() {
+                const id = productIdInput.value;
+                const name = productNameInput.value;
+                const code = productCodeInput.value;
+                const cost = parseFloat(productCostInput.value) || 0;
+                const price = parseFloat(productPriceInput.value) || 0;
+                const stock = parseInt(productStockInput.value) || 0;
+                
+                if (!name || !code) {
+                    alert('Por favor, preencha pelo menos o nome e código do produto.');
+                    return;
+                }
+                
+                const productData = {
+                    name,
+                    code,
+                    cost,
+                    price,
+                    stock
+                };
+                
+                if (id) {
+                    productData.id = id;
+                    saveProductToFirebase(productData)
+                        .then(() => {
+                            productFormCard.style.display = 'none';
+                        })
+                        .catch(error => {
+                            console.error('Erro ao atualizar produto:', error);
+                            alert('Erro ao atualizar produto!');
+                        });
+                } else {
+                    saveProductToFirebase(productData)
+                        .then(() => {
+                            productFormCard.style.display = 'none';
+                        })
+                        .catch(error => {
+                            console.error('Erro ao adicionar produto:', error);
+                            alert('Erro ao adicionar produto!');
+                        });
+                }
+            });
+            
+            // Buscar produtos
+            searchProductBtn.addEventListener('click', searchProducts);
+            productSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchProducts();
+            });
+            
+            // Buscar estoque
+            stockSearchBtn.addEventListener('click', searchStock);
+            stockSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchStock();
+            });
+            
+            // Buscar clientes
+            clientSearchBtn.addEventListener('click', searchClients);
+            clientSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchClients();
+            });
+        }
+        
+        // Atualizar carrinho
         function updateCart() {
             cartItems.innerHTML = '';
             
@@ -1893,11 +2106,13 @@
             cartTotal.style.display = 'block';
             finalizeSaleBtn.disabled = false;
             
+            // Adicionar event listeners para os botões de quantidade
             document.querySelectorAll('.increase').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const productId = this.getAttribute('data-id');
                     const cartItem = cart.find(item => item.id === productId);
                     
+                    // Verificar se há estoque disponível
                     const product = products.find(p => p.id === productId);
                     if (cartItem.quantity < product.stock) {
                         cartItem.quantity++;
@@ -1926,6 +2141,7 @@
                     const cartItem = cart.find(item => item.id === productId);
                     const newQuantity = parseInt(this.value) || 1;
                     
+                    // Verificar se há estoque disponível
                     const product = products.find(p => p.id === productId);
                     if (newQuantity <= product.stock) {
                         cartItem.quantity = newQuantity;
@@ -1945,7 +2161,22 @@
                 });
             });
         }
-
+        
+        // Atualizar estoque após venda
+        function updateStockAfterSale() {
+            cart.forEach(cartItem => {
+                const product = products.find(p => p.id === cartItem.id);
+                if (product) {
+                    product.stock -= cartItem.quantity;
+                    if (product.stock < 0) product.stock = 0;
+                    
+                    // Atualizar no Firebase
+                    saveProductToFirebase(product);
+                }
+            });
+        }
+        
+        // Editar cliente
         function editClient(clientId) {
             const client = clients.find(c => c.id === clientId);
             if (client) {
@@ -1957,7 +2188,19 @@
                 clientFormCard.style.display = 'block';
             }
         }
-
+        
+        // Excluir cliente
+        function deleteClient(clientId) {
+            if (confirm('Tem certeza que deseja excluir este cliente?')) {
+                deleteClientFromFirebase(clientId)
+                    .catch(error => {
+                        console.error('Erro ao excluir cliente:', error);
+                        alert('Erro ao excluir cliente!');
+                    });
+            }
+        }
+        
+        // Editar produto
         function editProduct(productId) {
             const product = products.find(p => p.id === productId);
             if (product) {
@@ -1971,50 +2214,34 @@
                 productFormCard.style.display = 'block';
             }
         }
-
-        function deleteClient(clientId) {
-            if (confirm('Tem certeza que deseja excluir este cliente?')) {
-                deleteClientFromFirebase(clientId)
-                    .then(() => {
-                        console.log('Cliente excluído com sucesso');
-                    })
-                    .catch(error => {
-                        console.error('Erro ao excluir cliente:', error);
-                        alert('Erro ao excluir cliente. Tente novamente.');
-                    });
-            }
-        }
-
+        
+        // Excluir produto
         function deleteProduct(productId) {
             if (confirm('Tem certeza que deseja excluir este produto?')) {
                 deleteProductFromFirebase(productId)
-                    .then(() => {
-                        console.log('Produto excluído com sucesso');
-                    })
                     .catch(error => {
                         console.error('Erro ao excluir produto:', error);
-                        alert('Erro ao excluir produto. Tente novamente.');
+                        alert('Erro ao excluir produto!');
                     });
             }
         }
-
+        
+        // Receber pagamento
         function receivePayment(receivableId) {
             if (confirm('Deseja marcar este recebível como pago?')) {
                 const receivable = receivables.find(r => r.id === receivableId);
                 if (receivable) {
                     receivable.status = 'paid';
                     saveReceivableToFirebase(receivable)
-                        .then(() => {
-                            console.log('Recebível marcado como pago');
-                        })
                         .catch(error => {
                             console.error('Erro ao atualizar recebível:', error);
-                            alert('Erro ao atualizar recebível. Tente novamente.');
+                            alert('Erro ao atualizar recebível!');
                         });
                 }
             }
         }
-
+        
+        // Buscar produtos
         function searchProducts() {
             const searchTerm = productSearchInput.value.toLowerCase();
             
@@ -2051,7 +2278,8 @@
                 productList.appendChild(li);
             });
         }
-
+        
+        // Buscar estoque
         function searchStock() {
             const searchTerm = stockSearchInput.value.toLowerCase();
             
@@ -2092,6 +2320,7 @@
                 stockList.appendChild(li);
             });
             
+            // Adicionar event listeners para editar e excluir produtos
             document.querySelectorAll('.edit-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -2108,7 +2337,8 @@
                 });
             });
         }
-
+        
+        // Buscar clientes
         function searchClients() {
             const searchTerm = clientSearchInput.value.toLowerCase();
             
@@ -2147,6 +2377,7 @@
                 clientList.appendChild(li);
             });
             
+            // Adicionar event listeners para editar e excluir
             document.querySelectorAll('.edit-client').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -2163,302 +2394,18 @@
                 });
             });
         }
-
+        
+        // Atualizar data e hora
         function updateDateTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateString = now.toLocaleDateString('pt-BR', options);
+            
+            // Capitalizar primeira letra
             const formattedDate = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+            
             document.querySelector('.date-display').textContent = formattedDate;
         }
-
-        function setupEventListeners() {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    const tab = this.getAttribute('data-tab');
-                    
-                    document.querySelectorAll('.nav-item').forEach(nav => {
-                        nav.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    document.getElementById(tab).classList.add('active');
-                    
-                    if (tab === 'reports') {
-                        generateReport();
-                    }
-                });
-            });
-            
-            productList.addEventListener('click', function(e) {
-                const productItem = e.target.closest('.product-item');
-                if (productItem) {
-                    const productId = productItem.getAttribute('data-id');
-                    const productName = productItem.getAttribute('data-name');
-                    const productPrice = parseFloat(productItem.getAttribute('data-price'));
-                    
-                    const existingItem = cart.find(item => item.id === productId);
-                    
-                    if (existingItem) {
-                        const product = products.find(p => p.id === productId);
-                        if (existingItem.quantity < product.stock) {
-                            existingItem.quantity++;
-                        } else {
-                            alert('Estoque insuficiente para este produto!');
-                        }
-                    } else {
-                        const product = products.find(p => p.id === productId);
-                        if (product.stock > 0) {
-                            cart.push({
-                                id: productId,
-                                name: productName,
-                                price: productPrice,
-                                quantity: 1
-                            });
-                        } else {
-                            alert('Produto sem estoque disponível!');
-                        }
-                    }
-                    
-                    updateCart();
-                }
-            });
-            
-            finalizeSaleBtn.addEventListener('click', function() {
-                if (cart.length === 0) return;
-                
-                let summaryHTML = '<div class="sale-summary">';
-                cart.forEach(item => {
-                    summaryHTML += `
-                        <div class="sale-item">
-                            <div class="sale-info">${item.name} x ${item.quantity}</div>
-                            <div class="sale-value">R$ ${(item.price * item.quantity).toFixed(2)}</div>
-                        </div>
-                    `;
-                });
-                summaryHTML += `
-                    <div class="cart-total">
-                        Total: R$ ${total.toFixed(2)}
-                    </div>
-                `;
-                
-                const clientId = clientSelect.value;
-                if (clientId) {
-                    const client = clients.find(c => c.id === clientId);
-                    summaryHTML += `<p><strong>Cliente:</strong> ${client.name}</p>`;
-                }
-                
-                summaryHTML += '</div>';
-                
-                saleSummary.innerHTML = summaryHTML;
-                saleModal.style.display = 'flex';
-            });
-            
-            cashOption.addEventListener('click', function() {
-                cashOption.classList.add('active');
-                termOption.classList.remove('active');
-                document.querySelector('input[name="payment-method"][value="cash"]').checked = true;
-                dueDateContainer.style.display = 'none';
-            });
-            
-            termOption.addEventListener('click', function() {
-                termOption.classList.add('active');
-                cashOption.classList.remove('active');
-                document.querySelector('input[name="payment-method"][value="term"]').checked = true;
-                dueDateContainer.style.display = 'block';
-            });
-            
-            confirmSaleBtn.addEventListener('click', function() {
-                const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
-                const clientId = clientSelect.value;
-                const client = clientId ? clients.find(c => c.id === clientId) : null;
-                const clientName = client ? client.name : 'Cliente não identificado';
-
-                if (paymentMethod === 'term') {
-                    const dueDate = dueDateInput.value;
-                    if (!dueDate) {
-                        alert('Por favor, selecione uma data de vencimento para vendas a prazo.');
-                        return;
-                    }
-
-                    const receivableData = {
-                        client: clientName,
-                        value: total,
-                        dueDate: dueDate,
-                        status: 'pending'
-                    };
-
-                    saveReceivableToFirebase(receivableData)
-                        .catch(error => {
-                            console.error('Erro ao salvar recebível:', error);
-                            alert('Erro ao salvar recebível. Tente novamente.');
-                        });
-                }
-
-                const saleData = {
-                    date: new Date().toISOString(),
-                    clientId: clientId,
-                    clientName: clientName,
-                    items: [...cart],
-                    total: total,
-                    paymentMethod: paymentMethod
-                };
-
-                saveSaleToFirebase(saleData)
-                    .then(() => {
-                        if (client) {
-                            client.totalPurchases = (client.totalPurchases || 0) + total;
-                            saveClientToFirebase(client)
-                                .catch(error => {
-                                    console.error('Erro ao atualizar cliente:', error);
-                                });
-                        }
-
-                        const stockUpdates = [];
-                        cart.forEach(cartItem => {
-                            const product = products.find(p => p.id === cartItem.id);
-                            if (product) {
-                                const newStock = product.stock - cartItem.quantity;
-                                stockUpdates.push(updateStockInFirebase(product.id, newStock));
-                            }
-                        });
-
-                        Promise.all(stockUpdates)
-                            .then(() => {
-                                cart = [];
-                                updateCart();
-                                saleModal.style.display = 'none';
-                                clientSelect.value = '';
-                                alert('Venda finalizada com sucesso!');
-                            })
-                            .catch(error => {
-                                console.error('Erro ao atualizar estoque:', error);
-                                alert('Venda finalizada, mas houve erro ao atualizar estoque.');
-                            });
-                    })
-                    .catch(error => {
-                        console.error('Erro ao salvar venda:', error);
-                        alert('Erro ao finalizar venda. Tente novamente.');
-                    });
-            });
-            
-            cancelSaleBtn.addEventListener('click', function() {
-                saleModal.style.display = 'none';
-            });
-            
-            addClientBtn.addEventListener('click', function() {
-                clientFormTitle.textContent = 'Novo Cliente';
-                clientIdInput.value = '';
-                clientNameInput.value = '';
-                clientEmailInput.value = '';
-                clientPhoneInput.value = '';
-                clientFormCard.style.display = 'block';
-            });
-            
-            cancelClientBtn.addEventListener('click', function() {
-                clientFormCard.style.display = 'none';
-            });
-            
-            saveClientBtn.addEventListener('click', function() {
-                const id = clientIdInput.value;
-                const name = clientNameInput.value;
-                const email = clientEmailInput.value;
-                const phone = clientPhoneInput.value;
-
-                if (!name) {
-                    alert('Por favor, preencha o nome do cliente.');
-                    return;
-                }
-
-                const clientData = { id, name, email, phone };
-
-                saveClientToFirebase(clientData)
-                    .then(() => {
-                        clientFormCard.style.display = 'none';
-                        alert('Cliente salvo com sucesso!');
-                    })
-                    .catch(error => {
-                        console.error('Erro ao salvar cliente:', error);
-                        alert('Erro ao salvar cliente. Tente novamente.');
-                    });
-            });
-            
-            addProductBtn.addEventListener('click', function() {
-                productFormTitle.textContent = 'Novo Produto';
-                productIdInput.value = '';
-                productNameInput.value = '';
-                productCodeInput.value = '';
-                productCostInput.value = '';
-                productPriceInput.value = '';
-                productStockInput.value = '';
-                productFormCard.style.display = 'block';
-            });
-            
-            cancelProductBtn.addEventListener('click', function() {
-                productFormCard.style.display = 'none';
-            });
-            
-            saveProductBtn.addEventListener('click', function() {
-                const id = productIdInput.value;
-                const name = productNameInput.value;
-                const code = productCodeInput.value;
-                const cost = parseFloat(productCostInput.value) || 0;
-                const price = parseFloat(productPriceInput.value) || 0;
-                const stock = parseInt(productStockInput.value) || 0;
-
-                if (!name || !code) {
-                    alert('Por favor, preencha pelo menos o nome e código do produto.');
-                    return;
-                }
-
-                const productData = { id, name, code, cost, price, stock };
-
-                saveProductToFirebase(productData)
-                    .then(() => {
-                        productFormCard.style.display = 'none';
-                        alert('Produto salvo com sucesso!');
-                    })
-                    .catch(error => {
-                        console.error('Erro ao salvar produto:', error);
-                        alert('Erro ao salvar produto. Tente novamente.');
-                    });
-            });
-            
-            searchProductBtn.addEventListener('click', searchProducts);
-            productSearchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') searchProducts();
-            });
-            
-            stockSearchBtn.addEventListener('click', searchStock);
-            stockSearchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') searchStock();
-            });
-            
-            clientSearchBtn.addEventListener('click', searchClients);
-            clientSearchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') searchClients();
-            });
-        }
-
-        // ==================== INICIALIZAÇÃO ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Iniciando Business Control...');
-            loadFirebaseData();
-            setupEventListeners();
-            updateDateTime();
-            
-            const today = new Date().toISOString().split('T')[0];
-            dueDateInput.setAttribute('min', today);
-            dueDateInput.value = today;
-            
-            reportPeriod.addEventListener('change', generateReport);
-            reportType.addEventListener('change', generateReport);
-            
-            console.log('✅ Business Control iniciado com sucesso!');
-        });
     </script>
 </body>
 </html>
