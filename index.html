@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONTROLE DE VENDAS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Adicionar Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        /* Seu CSS existente permanece igual */
         * {
             margin: 0;
             padding: 0;
@@ -208,17 +206,9 @@
             font-weight: 600;
         }
         
-        .paid {
-            color: #2ed573;
-        }
-        
-        .pending {
-            color: #ffa502;
-        }
-        
-        .overdue {
-            color: #ff4757;
-        }
+        .paid { color: #2ed573; }
+        .pending { color: #ffa502; }
+        .overdue { color: #ff4757; }
         
         .btn {
             background: #2575fc;
@@ -233,27 +223,21 @@
             transition: all 0.3s;
         }
         
-        .btn:hover {
-            background: #1c60cb;
-        }
+        .btn:hover { background: #1c60cb; }
         
         .btn-secondary {
             background: #f0f0f0;
             color: #333;
         }
         
-        .btn-secondary:hover {
-            background: #ddd;
-        }
+        .btn-secondary:hover { background: #ddd; }
         
         .btn-danger {
             background: #ff4757;
             color: white;
         }
         
-        .btn-danger:hover {
-            background: #ff2e43;
-        }
+        .btn-danger:hover { background: #ff2e43; }
         
         .search-bar {
             display: flex;
@@ -284,9 +268,7 @@
             border-bottom: 1px solid #f0f0f0;
         }
         
-        .cart-item-info {
-            flex: 2;
-        }
+        .cart-item-info { flex: 2; }
         
         .cart-item-quantity {
             display: flex;
@@ -329,13 +311,9 @@
             text-align: right;
         }
         
-        .client-form, .product-form {
-            margin-top: 15px;
-        }
+        .client-form, .product-form { margin-top: 15px; }
         
-        .form-group {
-            margin-bottom: 15px;
-        }
+        .form-group { margin-bottom: 15px; }
         
         .form-group label {
             display: block;
@@ -415,9 +393,7 @@
             background-color: #f0f7ff;
         }
         
-        .payment-option input {
-            margin-right: 10px;
-        }
+        .payment-option input { margin-right: 10px; }
         
         .due-date-container {
             display: none;
@@ -446,13 +422,8 @@
             font-size: 16px;
         }
 
-        .fa-edit {
-            color: #2575fc;
-        }
-
-        .fa-trash {
-            color: #ff4757;
-        }
+        .fa-edit { color: #2575fc; }
+        .fa-trash { color: #ff4757; }
 
         .receivable-actions {
             display: flex;
@@ -466,10 +437,7 @@
             width: auto;
         }
         
-        /* NOVOS ESTILOS PARA OS RELATÓRIOS */
-        .report-section {
-            margin-top: 15px;
-        }
+        .report-section { margin-top: 15px; }
         
         .report-header {
             display: flex;
@@ -499,9 +467,7 @@
             border-bottom: 1px solid #f9f9f9;
         }
         
-        .report-item:last-child {
-            border-bottom: none;
-        }
+        .report-item:last-child { border-bottom: none; }
         
         .report-item-name {
             flex: 2;
@@ -537,7 +503,6 @@
             border-radius: 8px;
         }
 
-        /* Loading styles */
         .loading {
             text-align: center;
             padding: 20px;
@@ -554,6 +519,65 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* NOVOS ESTILOS: Lucro no header do card */
+        .profit-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #2ed573;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .profit-badge small {
+            display: block;
+            font-size: 10px;
+            font-weight: 400;
+            color: #888;
+            text-align: right;
+        }
+
+        /* NOVOS ESTILOS: Sugestões de cliente */
+        .client-search-wrapper {
+            position: relative;
+        }
+        #client-suggestions {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 50;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .client-suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .client-suggestion-item:last-child { border-bottom: none; }
+        .client-suggestion-item:hover { background: #f0f7ff; }
+        #client-selected-display {
+            display: none;
+            margin-top: 8px;
+            padding: 8px;
+            background: #f0f7ff;
+            border-radius: 6px;
+            font-size: 13px;
+            border-left: 3px solid #2575fc;
+        }
+        #edit-goal-btn {
+            color: #2575fc;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 3px;
         }
     </style>
 </head>
@@ -574,7 +598,13 @@
                 <div class="card">
                     <div class="card-title">
                         <span>Visão Geral</span>
-                        <i class="fas fa-chart-line"></i>
+                        <div class="profit-badge">
+                            <div>
+                                <div id="month-profit" style="font-size:15px; font-weight:700;">+R$ 0,00</div>
+                                <small>Lucro do mês</small>
+                            </div>
+                            <i class="fas fa-chart-line" style="color:#2575fc;"></i>
+                        </div>
                     </div>
                     <p>Resumo do desempenho do seu negócio</p>
                     
@@ -589,7 +619,9 @@
                         </div>
                         <div class="stat-item">
                             <div class="stat-value" id="goal-percentage">0%</div>
-                            <div class="stat-label">Meta</div>
+                            <div class="stat-label">
+                                Meta <i class="fas fa-edit" id="edit-goal-btn" title="Editar meta"></i>
+                            </div>
                         </div>
                     </div>
                     
@@ -598,7 +630,7 @@
                     </div>
                 </div>
                 
-                <!-- NOVA SEÇÃO: PRODUTOS MAIS VENDIDOS -->
+                <!-- PRODUTOS MAIS VENDIDOS -->
                 <div class="card">
                     <div class="card-title">
                         <span>Produtos Mais Vendidos</span>
@@ -613,7 +645,7 @@
                     </div>
                 </div>
                 
-                <!-- NOVA SEÇÃO: MELHORES CLIENTES -->
+                <!-- MELHORES CLIENTES -->
                 <div class="card">
                     <div class="card-title">
                         <span>Melhores Clientes</span>
@@ -681,11 +713,20 @@
                         Total: R$ <span id="total-value">0,00</span>
                     </div>
                     
+                    <!-- NOVO: Busca de cliente -->
                     <div class="form-group">
-                        <label for="client-select">Cliente</label>
+                        <label for="client-search-pdv">🔍 Buscar Cliente</label>
+                        <div class="client-search-wrapper">
+                            <input type="text" id="client-search-pdv" placeholder="Digite o nome ou telefone..." autocomplete="off">
+                            <div id="client-suggestions"></div>
+                        </div>
+                        <div id="client-selected-display"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="client-select">Ou selecione na lista</label>
                         <select id="client-select" class="form-control">
                             <option value="">Selecionar cliente...</option>
-                            <!-- Clientes carregados via JavaScript -->
                         </select>
                     </div>
                     
@@ -837,7 +878,7 @@
                 </div>
             </div>
             
-            <!-- NOVA ABA: Relatórios -->
+            <!-- Relatórios -->
             <div class="tab-content" id="reports">
                 <div class="card">
                     <div class="card-title">
@@ -902,9 +943,7 @@
         <div class="modal-content">
             <div class="modal-title">Resumo da Venda</div>
             
-            <div id="sale-summary">
-                <!-- Conteúdo será preenchido via JavaScript -->
-            </div>
+            <div id="sale-summary"></div>
             
             <div class="form-group">
                 <label>Forma de Pagamento</label>
@@ -947,11 +986,9 @@
             measurementId: "G-TK09V8H5M6"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Referências do Firebase
         const clientsRef = database.ref('clients');
         const productsRef = database.ref('products');
         const salesRef = database.ref('sales');
@@ -959,7 +996,6 @@
         const salesHistoryRef = database.ref('salesHistory');
         const salesDataRef = database.ref('salesData');
 
-        // Dados da aplicação (cache local)
         let cart = [];
         let total = 0;
         let clients = [];
@@ -967,12 +1003,14 @@
         let receivables = [];
         let salesHistory = [];
         
-        // Dados de vendas para dashboard
         let sales = {
             today: 0,
             month: 0,
-            goal: 30000 // Meta mensal de R$ 30.000
+            goal: 30000
         };
+
+        // NOVO: cliente selecionado via busca
+        let selectedClientFromSearch = null;
         
         // Elementos do DOM
         const productList = document.getElementById('product-list');
@@ -1027,32 +1065,33 @@
         const overdueValueElement = document.getElementById('overdue-value');
         const totalReceivablesElement = document.getElementById('total-receivables');
         
-        // NOVOS ELEMENTOS: Relatórios
         const topProductsSection = document.getElementById('top-products-section');
         const topClientsSection = document.getElementById('top-clients-section');
         const reportPeriod = document.getElementById('report-period');
         const reportType = document.getElementById('report-type');
         const detailedReport = document.getElementById('detailed-report');
+
+        // NOVOS elementos
+        const monthProfitElement = document.getElementById('month-profit');
+        const editGoalBtn = document.getElementById('edit-goal-btn');
+        const clientSearchPdv = document.getElementById('client-search-pdv');
+        const clientSuggestions = document.getElementById('client-suggestions');
+        const clientSelectedDisplay = document.getElementById('client-selected-display');
         
-        // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            // Carregar dados do Firebase
             loadFirebaseData();
             setupEventListeners();
             updateDateTime();
             
-            // Definir data mínima para o datepicker (hoje)
             const today = new Date().toISOString().split('T')[0];
             dueDateInput.setAttribute('min', today);
             
-            // Adicionar event listeners para os relatórios
             reportPeriod.addEventListener('change', generateReport);
             reportType.addEventListener('change', generateReport);
         });
 
-        // Funções do Firebase
+        // ==================== FIREBASE ====================
         function loadFirebaseData() {
-            // Carregar clientes
             clientsRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 clients = data ? Object.values(data) : [];
@@ -1060,7 +1099,6 @@
                 updateDashboard();
             });
 
-            // Carregar produtos
             productsRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 products = data ? Object.values(data) : [];
@@ -1068,7 +1106,6 @@
                 updateDashboard();
             });
 
-            // Carregar recebíveis
             receivablesRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 receivables = data ? Object.values(data) : [];
@@ -1076,7 +1113,6 @@
                 updateDashboard();
             });
 
-            // Carregar histórico de vendas
             salesHistoryRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 salesHistory = data ? Object.values(data) : [];
@@ -1084,7 +1120,6 @@
                 calculateSalesTotals();
             });
 
-            // Carregar dados de vendas
             salesDataRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -1098,10 +1133,8 @@
 
         function saveClientToFirebase(client) {
             if (client.id) {
-                // Atualizar cliente existente
                 return clientsRef.child(client.id).set(client);
             } else {
-                // Criar novo cliente
                 const newId = clientsRef.push().key;
                 client.id = newId;
                 return clientsRef.child(newId).set(client);
@@ -1114,10 +1147,8 @@
 
         function saveProductToFirebase(product) {
             if (product.id) {
-                // Atualizar produto existente
                 return productsRef.child(product.id).set(product);
             } else {
-                // Criar novo produto
                 const newId = productsRef.push().key;
                 product.id = newId;
                 return productsRef.child(newId).set(product);
@@ -1130,10 +1161,8 @@
 
         function saveReceivableToFirebase(receivable) {
             if (receivable.id) {
-                // Atualizar recebível existente
                 return receivablesRef.child(receivable.id).set(receivable);
             } else {
-                // Criar novo recebível
                 const newId = receivablesRef.push().key;
                 receivable.id = newId;
                 return receivablesRef.child(newId).set(receivable);
@@ -1150,45 +1179,65 @@
             return salesDataRef.set(sales);
         }
 
-       function calculateSalesTotals() {
-    const today = new Date();
-    
-    // CORREÇÃO: Criar datas comparáveis (ignorando horário)
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-    
-    const month = today.getMonth();
-    const year = today.getFullYear();
+        function calculateSalesTotals() {
+            const today = new Date();
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+            
+            const month = today.getMonth();
+            const year = today.getFullYear();
 
-    let todayTotal = 0;
-    let monthTotal = 0;
+            let todayTotal = 0;
+            let monthTotal = 0;
 
-    salesHistory.forEach(sale => {
-        const saleDate = new Date(sale.date);
-        
-        // CORREÇÃO: Comparar datas corretamente
-        if (saleDate >= todayStart && saleDate < todayEnd) {
-            todayTotal += sale.total;
+            salesHistory.forEach(sale => {
+                const saleDate = new Date(sale.date);
+                
+                if (saleDate >= todayStart && saleDate < todayEnd) {
+                    todayTotal += sale.total;
+                }
+                
+                if (saleDate.getMonth() === month && saleDate.getFullYear() === year) {
+                    monthTotal += sale.total;
+                }
+            });
+
+            sales.today = todayTotal;
+            sales.month = monthTotal;
+            
+            updateSalesData();
         }
-        
-        if (saleDate.getMonth() === month && saleDate.getFullYear() === year) {
-            monthTotal += sale.total;
-        }
-    });
 
-    sales.today = todayTotal;
-    sales.month = monthTotal;
-    
-    updateSalesData();
-}
-        
-        // Carregar clientes nos selects e listas
+        // ==================== NOVA FUNÇÃO: LUCRO DO MÊS ====================
+        function calculateMonthProfit() {
+            const today = new Date();
+            const month = today.getMonth();
+            const year = today.getFullYear();
+            let profit = 0;
+
+            salesHistory.forEach(sale => {
+                const saleDate = new Date(sale.date);
+                if (saleDate.getMonth() === month && saleDate.getFullYear() === year) {
+                    if (sale.items && Array.isArray(sale.items)) {
+                        sale.items.forEach(item => {
+                            const product = products.find(p => p.id === item.id);
+                            if (product) {
+                                const cost = product.cost || 0;
+                                profit += (item.price - cost) * item.quantity;
+                            }
+                        });
+                    }
+                }
+            });
+
+            return profit;
+        }
+
+        // ==================== CLIENTES ====================
         function loadClients() {
-            // Limpar selects e listas
             clientSelect.innerHTML = '<option value="">Selecionar cliente...</option>';
             clientList.innerHTML = '';
             
-            // Adicionar clientes ao select
             clients.forEach(client => {
                 const option = document.createElement('option');
                 option.value = client.id;
@@ -1196,7 +1245,6 @@
                 clientSelect.appendChild(option);
             });
             
-            // Adicionar clientes à lista
             if (clients.length === 0) {
                 clientList.innerHTML = '<div class="empty-cart"><p>Nenhum cliente cadastrado</p></div>';
             } else {
@@ -1217,26 +1265,23 @@
                     clientList.appendChild(li);
                 });
                 
-                // Adicionar event listeners para editar e excluir
                 document.querySelectorAll('.edit-client').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const clientId = this.getAttribute('data-id');
-                        editClient(clientId);
+                        editClient(this.getAttribute('data-id'));
                     });
                 });
                 
                 document.querySelectorAll('.delete-client').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const clientId = this.getAttribute('data-id');
-                        deleteClient(clientId);
+                        deleteClient(this.getAttribute('data-id'));
                     });
                 });
             }
         }
-        
-        // Carregar produtos
+
+        // ==================== PRODUTOS ====================
         function loadProducts() {
             productList.innerHTML = '';
             stockList.innerHTML = '';
@@ -1247,7 +1292,6 @@
                 return;
             }
             
-            // Adicionar produtos à lista do PDV
             products.forEach(product => {
                 const li = document.createElement('li');
                 li.className = 'product-item';
@@ -1264,7 +1308,6 @@
                 productList.appendChild(li);
             });
             
-            // Adicionar produtos à lista de estoque
             products.forEach(product => {
                 const li = document.createElement('li');
                 li.className = 'product-item';
@@ -1285,31 +1328,27 @@
                 stockList.appendChild(li);
             });
             
-            // Adicionar event listeners para editar e excluir produtos
             document.querySelectorAll('.edit-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const productId = this.getAttribute('data-id');
-                    editProduct(productId);
+                    editProduct(this.getAttribute('data-id'));
                 });
             });
             
             document.querySelectorAll('.delete-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const productId = this.getAttribute('data-id');
-                    deleteProduct(productId);
+                    deleteProduct(this.getAttribute('data-id'));
                 });
             });
         }
         
-        // Calcular margem de lucro
         function calculateMargin(cost, price) {
             if (cost === 0) return 100;
             return (((price - cost) / cost) * 100).toFixed(2);
         }
-        
-        // Carregar vendas a receber
+
+        // ==================== RECEBÍVEIS ====================
         function loadReceivables() {
             receivablesList.innerHTML = '';
             
@@ -1326,7 +1365,6 @@
             let totalReceivables = 0;
             
             receivables.forEach(item => {
-                // Verificar status
                 const today = new Date();
                 const dueDate = new Date(item.dueDate);
                 let status = 'pending';
@@ -1345,7 +1383,6 @@
                 
                 totalReceivables += item.value;
                 
-                // Formatar data
                 const formattedDate = dueDate.toLocaleDateString('pt-BR');
                 
                 const li = document.createElement('li');
@@ -1365,44 +1402,43 @@
                 receivablesList.appendChild(li);
             });
             
-            // Atualizar totais
             toReceiveValueElement.textContent = `R$ ${toReceiveTotal.toFixed(2)}`;
             overdueValueElement.textContent = `R$ ${overdueTotal.toFixed(2)}`;
             totalReceivablesElement.textContent = `R$ ${totalReceivables.toFixed(2)}`;
             
-            // Adicionar event listeners para o botão de receber
             document.querySelectorAll('.receive-payment').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const receivableId = this.getAttribute('data-id');
-                    receivePayment(receivableId);
+                    receivePayment(this.getAttribute('data-id'));
                 });
             });
         }
-        
-        // Atualizar dashboard
+
+        // ==================== DASHBOARD ====================
         function updateDashboard() {
-            // Atualizar vendas
             todaySalesElement.textContent = `R$ ${sales.today.toFixed(2)}`;
             monthSalesElement.textContent = `R$ ${sales.month.toFixed(2)}`;
             
-            // Calcular porcentagem da meta
             const goalPercentage = sales.month > 0 ? Math.min(100, (sales.month / sales.goal) * 100) : 0;
             goalPercentageElement.textContent = `${goalPercentage.toFixed(0)}%`;
             goalProgressElement.style.width = `${goalPercentage}%`;
+
+            // NOVO: atualizar lucro do mês
+            const profit = calculateMonthProfit();
+            if (profit > 0) {
+                monthProfitElement.textContent = `+R$ ${profit.toFixed(2).replace('.', ',')}`;
+            } else {
+                monthProfitElement.textContent = `R$ ${profit.toFixed(2).replace('.', ',')}`;
+            }
+            monthProfitElement.style.color = profit > 0 ? '#2ed573' : '#888';
             
-            // Atualizar recebíveis no dashboard
             updateDashboardReceivables();
-            
-            // Atualizar relatórios
             updateTopProductsReport();
             updateTopClientsReport();
         }
-        
-        // Atualizar recebíveis no dashboard
+
         function updateDashboardReceivables() {
             dashboardReceivables.innerHTML = '';
             
-            // Filtrar apenas recebíveis pendentes e vencidos
             const pendingReceivables = receivables.filter(item => {
                 if (item.status === 'paid') return false;
                 
@@ -1410,7 +1446,6 @@
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 
-                // Mostrar apenas os que vencem nos próximos 7 dias ou estão atrasados
                 const diffTime = dueDate.getTime() - today.getTime();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
@@ -1422,10 +1457,8 @@
                 return;
             }
             
-            // Ordenar por data de vencimento (mais próximos primeiro)
             pendingReceivables.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
             
-            // Mostrar apenas os 3 mais próximos
             const recentReceivables = pendingReceivables.slice(0, 3);
             
             recentReceivables.forEach(item => {
@@ -1458,34 +1491,32 @@
                 dashboardReceivables.appendChild(saleItem);
             });
         }
-        
-        // NOVA FUNÇÃO: Atualizar relatório de produtos mais vendidos
+
         function updateTopProductsReport() {
-            // Calcular totais de vendas por produto
             const productSales = {};
             
             salesHistory.forEach(sale => {
-                sale.items.forEach(item => {
-                    if (!productSales[item.id]) {
-                        productSales[item.id] = {
-                            id: item.id,
-                            name: item.name,
-                            quantity: 0,
-                            revenue: 0
-                        };
-                    }
-                    
-                    productSales[item.id].quantity += item.quantity;
-                    productSales[item.id].revenue += item.price * item.quantity;
-                });
+                if (sale.items && Array.isArray(sale.items)) {
+                    sale.items.forEach(item => {
+                        if (!productSales[item.id]) {
+                            productSales[item.id] = {
+                                id: item.id,
+                                name: item.name,
+                                quantity: 0,
+                                revenue: 0
+                            };
+                        }
+                        
+                        productSales[item.id].quantity += item.quantity;
+                        productSales[item.id].revenue += item.price * item.quantity;
+                    });
+                }
             });
             
-            // Converter para array e ordenar por quantidade vendida
             const topProducts = Object.values(productSales)
                 .sort((a, b) => b.quantity - a.quantity)
-                .slice(0, 5); // Top 5 produtos
+                .slice(0, 5);
             
-            // Atualizar a interface
             topProductsSection.innerHTML = '';
             
             if (topProducts.length === 0) {
@@ -1503,16 +1534,13 @@
                 topProductsSection.appendChild(itemElement);
             });
         }
-        
-        // NOVA FUNÇÃO: Atualizar relatório de melhores clientes
+
         function updateTopClientsReport() {
-            // Ordenar clientes por valor total de compras
             const topClients = [...clients]
                 .filter(client => (client.totalPurchases || 0) > 0)
                 .sort((a, b) => (b.totalPurchases || 0) - (a.totalPurchases || 0))
-                .slice(0, 5); // Top 5 clientes
+                .slice(0, 5);
             
-            // Atualizar a interface
             topClientsSection.innerHTML = '';
             
             if (topClients.length === 0) {
@@ -1530,15 +1558,14 @@
                 topClientsSection.appendChild(itemElement);
             });
         }
-        
-        // NOVA FUNÇÃO: Gerar relatório detalhado
+
+        // ==================== RELATÓRIOS ====================
         function generateReport() {
             const period = reportPeriod.value;
             const type = reportType.value;
             
             detailedReport.innerHTML = '';
             
-            // Filtrar vendas pelo período selecionado
             let filteredSales = [];
             const today = new Date();
             
@@ -1578,7 +1605,6 @@
                 return;
             }
             
-            // Gerar relatório com base no tipo selecionado
             if (type === 'products') {
                 generateProductReport(filteredSales);
             } else if (type === 'clients') {
@@ -1588,24 +1614,25 @@
             }
         }
         
-        // NOVA FUNÇÃO: Gerar relatório de produtos
         function generateProductReport(sales) {
             const productSales = {};
             
             sales.forEach(sale => {
-                sale.items.forEach(item => {
-                    if (!productSales[item.id]) {
-                        productSales[item.id] = {
-                            id: item.id,
-                            name: item.name,
-                            quantity: 0,
-                            revenue: 0
-                        };
-                    }
-                    
-                    productSales[item.id].quantity += item.quantity;
-                    productSales[item.id].revenue += item.price * item.quantity;
-                });
+                if (sale.items && Array.isArray(sale.items)) {
+                    sale.items.forEach(item => {
+                        if (!productSales[item.id]) {
+                            productSales[item.id] = {
+                                id: item.id,
+                                name: item.name,
+                                quantity: 0,
+                                revenue: 0
+                            };
+                        }
+                        
+                        productSales[item.id].quantity += item.quantity;
+                        productSales[item.id].revenue += item.price * item.quantity;
+                    });
+                }
             });
             
             const productsArray = Object.values(productSales)
@@ -1637,7 +1664,6 @@
             detailedReport.innerHTML = reportHTML;
         }
         
-        // NOVA FUNÇÃO: Gerar relatório de clientes
         function generateClientReport(sales) {
             const clientSales = {};
             
@@ -1686,7 +1712,6 @@
             detailedReport.innerHTML = reportHTML;
         }
         
-        // NOVA FUNÇÃO: Gerar relatório de vendas
         function generateSalesReport(sales) {
             const dailySales = {};
             
@@ -1736,27 +1761,24 @@
             
             detailedReport.innerHTML = reportHTML;
         }
-        
-        // Configurar event listeners
+
+        // ==================== EVENT LISTENERS ====================
         function setupEventListeners() {
             // Navegação por abas
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.addEventListener('click', function() {
                     const tab = this.getAttribute('data-tab');
                     
-                    // Ativar aba clicada
                     document.querySelectorAll('.nav-item').forEach(nav => {
                         nav.classList.remove('active');
                     });
                     this.classList.add('active');
                     
-                    // Mostrar conteúdo correspondente
                     document.querySelectorAll('.tab-content').forEach(content => {
                         content.classList.remove('active');
                     });
                     document.getElementById(tab).classList.add('active');
                     
-                    // Se for a aba de relatórios, gerar o relatório
                     if (tab === 'reports') {
                         generateReport();
                     }
@@ -1771,11 +1793,9 @@
                     const productName = productItem.getAttribute('data-name');
                     const productPrice = parseFloat(productItem.getAttribute('data-price'));
                     
-                    // Verificar se o produto já está no carrinho
                     const existingItem = cart.find(item => item.id === productId);
                     
                     if (existingItem) {
-                        // Verificar se há estoque disponível
                         const product = products.find(p => p.id === productId);
                         if (existingItem.quantity < product.stock) {
                             existingItem.quantity++;
@@ -1783,7 +1803,6 @@
                             alert('Estoque insuficiente para este produto!');
                         }
                     } else {
-                        // Verificar se há estoque disponível
                         const product = products.find(p => p.id === productId);
                         if (product.stock > 0) {
                             cart.push({
@@ -1805,7 +1824,6 @@
             finalizeSaleBtn.addEventListener('click', function() {
                 if (cart.length === 0) return;
                 
-                // Criar resumo da venda
                 let summaryHTML = '<div class="sale-summary">';
                 cart.forEach(item => {
                     summaryHTML += `
@@ -1821,18 +1839,15 @@
                     </div>
                 `;
                 
-                // Adicionar informações do cliente se selecionado
                 const clientId = clientSelect.value;
                 if (clientId) {
                     const client = clients.find(c => c.id === clientId);
-                    summaryHTML += `<p><strong>Cliente:</strong> ${client.name}</p>`;
+                    if (client) summaryHTML += `<p><strong>Cliente:</strong> ${client.name}</p>`;
                 }
                 
                 summaryHTML += '</div>';
                 
                 saleSummary.innerHTML = summaryHTML;
-                
-                // Mostrar modal
                 saleModal.style.display = 'flex';
             });
             
@@ -1864,7 +1879,6 @@
                         return;
                     }
                     
-                    // Adicionar à lista de recebíveis
                     const receivable = {
                         client: clientName,
                         value: total,
@@ -1879,7 +1893,6 @@
                         });
                 }
                 
-                // Registrar venda no histórico
                 const saleDate = new Date().toISOString();
                 const sale = {
                     date: saleDate,
@@ -1892,7 +1905,6 @@
                 
                 saveSaleToHistory(sale)
                     .then(() => {
-                        // Atualizar total de compras do cliente
                         if (clientId) {
                             const client = clients.find(c => c.id === clientId);
                             if (client) {
@@ -1901,18 +1913,18 @@
                             }
                         }
                         
-                        // Atualizar estoque
                         updateStockAfterSale();
                         
-                        // Limpar carrinho
                         cart = [];
                         updateCart();
                         
-                        // Fechar modal
                         saleModal.style.display = 'none';
                         
-                        // Resetar seleção de cliente
+                        // Limpar seleção de cliente (select + busca)
                         clientSelect.value = '';
+                        selectedClientFromSearch = null;
+                        clientSelectedDisplay.style.display = 'none';
+                        clientSearchPdv.value = '';
                         
                         alert('Venda finalizada com sucesso!');
                     })
@@ -1960,7 +1972,6 @@
                 };
                 
                 if (id) {
-                    // Preservar o total de compras ao editar
                     const existingClient = clients.find(c => c.id === id);
                     if (existingClient) {
                         clientData.totalPurchases = existingClient.totalPurchases || 0;
@@ -2058,14 +2069,98 @@
                 if (e.key === 'Enter') searchStock();
             });
             
-            // Buscar clientes
+            // Buscar clientes (aba clientes)
             clientSearchBtn.addEventListener('click', searchClients);
             clientSearchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') searchClients();
             });
+
+            // ==================== NOVO: EDITAR META ====================
+            editGoalBtn.addEventListener('click', function() {
+                const currentGoal = sales.goal || 30000;
+                const input = prompt('Digite o novo valor da meta mensal (R$):', currentGoal.toFixed(2));
+                if (input === null) return;
+                const newGoal = parseFloat(input.replace(',', '.'));
+                if (isNaN(newGoal) || newGoal <= 0) {
+                    alert('Valor inválido! Digite um número maior que zero.');
+                    return;
+                }
+                sales.goal = newGoal;
+                updateSalesData();
+                updateDashboard();
+            });
+
+            // ==================== NOVO: BUSCA DE CLIENTE NO PDV ====================
+            clientSearchPdv.addEventListener('input', function() {
+                const term = this.value.trim().toLowerCase();
+
+                if (!term) {
+                    clientSuggestions.style.display = 'none';
+                    clientSuggestions.innerHTML = '';
+                    return;
+                }
+
+                const filtered = clients.filter(c =>
+                    c.name.toLowerCase().includes(term) ||
+                    (c.phone && c.phone.toLowerCase().includes(term))
+                );
+
+                if (filtered.length === 0) {
+                    clientSuggestions.innerHTML = '<div style="padding:10px; color:#888; font-size:13px;">Nenhum cliente encontrado</div>';
+                    clientSuggestions.style.display = 'block';
+                    return;
+                }
+
+                clientSuggestions.innerHTML = '';
+                filtered.slice(0, 8).forEach(client => {
+                    const div = document.createElement('div');
+                    div.className = 'client-suggestion-item';
+                    div.innerHTML = `<strong>${client.name}</strong>${client.phone ? ' <span style="color:#888; font-size:12px;">' + client.phone + '</span>' : ''}`;
+                    div.addEventListener('click', () => {
+                        selectedClientFromSearch = client;
+                        clientSearchPdv.value = '';
+                        clientSuggestions.style.display = 'none';
+                        clientSuggestions.innerHTML = '';
+                        clientSelect.value = client.id;
+                        showSelectedClient(client);
+                    });
+                    clientSuggestions.appendChild(div);
+                });
+
+                clientSuggestions.style.display = 'block';
+            });
+
+            // Fechar sugestões ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!clientSearchPdv.contains(e.target) && !clientSuggestions.contains(e.target)) {
+                    clientSuggestions.style.display = 'none';
+                }
+            });
+
+            // Se trocar no select, limpa a busca
+            clientSelect.addEventListener('change', function() {
+                if (this.value) {
+                    selectedClientFromSearch = null;
+                    clientSelectedDisplay.style.display = 'none';
+                }
+            });
         }
-        
-        // Atualizar carrinho
+
+        // Mostrar cliente selecionado na busca
+        function showSelectedClient(client) {
+            clientSelectedDisplay.style.display = 'block';
+            clientSelectedDisplay.innerHTML = `
+                ✔ <strong>${client.name}</strong>
+                <i class="fas fa-times" id="clear-client-selection" style="float:right; cursor:pointer; color:#ff4757;"></i>
+            `;
+            document.getElementById('clear-client-selection').addEventListener('click', () => {
+                selectedClientFromSearch = null;
+                clientSelect.value = '';
+                clientSelectedDisplay.style.display = 'none';
+            });
+        }
+
+        // ==================== CARRINHO ====================
         function updateCart() {
             cartItems.innerHTML = '';
             
@@ -2109,13 +2204,11 @@
             cartTotal.style.display = 'block';
             finalizeSaleBtn.disabled = false;
             
-            // Adicionar event listeners para os botões de quantidade
             document.querySelectorAll('.increase').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const productId = this.getAttribute('data-id');
                     const cartItem = cart.find(item => item.id === productId);
                     
-                    // Verificar se há estoque disponível
                     const product = products.find(p => p.id === productId);
                     if (cartItem.quantity < product.stock) {
                         cartItem.quantity++;
@@ -2144,7 +2237,6 @@
                     const cartItem = cart.find(item => item.id === productId);
                     const newQuantity = parseInt(this.value) || 1;
                     
-                    // Verificar se há estoque disponível
                     const product = products.find(p => p.id === productId);
                     if (newQuantity <= product.stock) {
                         cartItem.quantity = newQuantity;
@@ -2165,21 +2257,18 @@
             });
         }
         
-        // Atualizar estoque após venda
         function updateStockAfterSale() {
             cart.forEach(cartItem => {
                 const product = products.find(p => p.id === cartItem.id);
                 if (product) {
                     product.stock -= cartItem.quantity;
                     if (product.stock < 0) product.stock = 0;
-                    
-                    // Atualizar no Firebase
                     saveProductToFirebase(product);
                 }
             });
         }
         
-        // Editar cliente
+        // ==================== CLIENTES/PRODUTOS EDIT/DELETE ====================
         function editClient(clientId) {
             const client = clients.find(c => c.id === clientId);
             if (client) {
@@ -2192,7 +2281,6 @@
             }
         }
         
-        // Excluir cliente
         function deleteClient(clientId) {
             if (confirm('Tem certeza que deseja excluir este cliente?')) {
                 deleteClientFromFirebase(clientId)
@@ -2203,7 +2291,6 @@
             }
         }
         
-        // Editar produto
         function editProduct(productId) {
             const product = products.find(p => p.id === productId);
             if (product) {
@@ -2218,7 +2305,6 @@
             }
         }
         
-        // Excluir produto
         function deleteProduct(productId) {
             if (confirm('Tem certeza que deseja excluir este produto?')) {
                 deleteProductFromFirebase(productId)
@@ -2229,7 +2315,6 @@
             }
         }
         
-        // Receber pagamento
         function receivePayment(receivableId) {
             if (confirm('Deseja marcar este recebível como pago?')) {
                 const receivable = receivables.find(r => r.id === receivableId);
@@ -2244,7 +2329,7 @@
             }
         }
         
-        // Buscar produtos
+        // ==================== BUSCAS ====================
         function searchProducts() {
             const searchTerm = productSearchInput.value.toLowerCase();
             
@@ -2282,7 +2367,6 @@
             });
         }
         
-        // Buscar estoque
         function searchStock() {
             const searchTerm = stockSearchInput.value.toLowerCase();
             
@@ -2323,25 +2407,21 @@
                 stockList.appendChild(li);
             });
             
-            // Adicionar event listeners para editar e excluir produtos
             document.querySelectorAll('.edit-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const productId = this.getAttribute('data-id');
-                    editProduct(productId);
+                    editProduct(this.getAttribute('data-id'));
                 });
             });
             
             document.querySelectorAll('.delete-product').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const productId = this.getAttribute('data-id');
-                    deleteProduct(productId);
+                    deleteProduct(this.getAttribute('data-id'));
                 });
             });
         }
         
-        // Buscar clientes
         function searchClients() {
             const searchTerm = clientSearchInput.value.toLowerCase();
             
@@ -2352,8 +2432,8 @@
             
             const filteredClients = clients.filter(client => 
                 client.name.toLowerCase().includes(searchTerm) || 
-                client.email.toLowerCase().includes(searchTerm) ||
-                client.phone.toLowerCase().includes(searchTerm)
+                (client.email && client.email.toLowerCase().includes(searchTerm)) ||
+                (client.phone && client.phone.toLowerCase().includes(searchTerm))
             );
             
             clientList.innerHTML = '';
@@ -2380,39 +2460,29 @@
                 clientList.appendChild(li);
             });
             
-            // Adicionar event listeners para editar e excluir
             document.querySelectorAll('.edit-client').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const clientId = this.getAttribute('data-id');
-                    editClient(clientId);
+                    editClient(this.getAttribute('data-id'));
                 });
             });
             
             document.querySelectorAll('.delete-client').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const clientId = this.getAttribute('data-id');
-                    deleteClient(clientId);
+                    deleteClient(this.getAttribute('data-id'));
                 });
             });
         }
         
-        // Atualizar data e hora
+        // ==================== DATA/HORA ====================
         function updateDateTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateString = now.toLocaleDateString('pt-BR', options);
-            
-            // Capitalizar primeira letra
             const formattedDate = dateString.charAt(0).toUpperCase() + dateString.slice(1);
-            
             document.querySelector('.date-display').textContent = formattedDate;
         }
     </script>
 </body>
 </html>
-
-
-
-
