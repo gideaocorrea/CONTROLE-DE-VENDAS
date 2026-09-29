@@ -521,7 +521,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* NOVOS ESTILOS: Lucro no header do card */
+        /* Lucro no header do card */
         .profit-badge {
             display: flex;
             align-items: center;
@@ -538,7 +538,7 @@
             text-align: right;
         }
 
-        /* NOVOS ESTILOS: Sugestões de cliente */
+        /* Sugestões de cliente */
         .client-search-wrapper {
             position: relative;
         }
@@ -578,6 +578,17 @@
             cursor: pointer;
             font-size: 11px;
             margin-left: 3px;
+        }
+
+        /* Botões de filtro A Receber */
+        .btn-receivable-filter {
+            margin-top: 0 !important;
+            font-size: 13px !important;
+            padding: 8px !important;
+        }
+        .btn-receivable-filter.active {
+            background: #2575fc !important;
+            color: white !important;
         }
     </style>
 </head>
@@ -630,7 +641,6 @@
                     </div>
                 </div>
                 
-                <!-- PRODUTOS MAIS VENDIDOS -->
                 <div class="card">
                     <div class="card-title">
                         <span>Produtos Mais Vendidos</span>
@@ -645,7 +655,6 @@
                     </div>
                 </div>
                 
-                <!-- MELHORES CLIENTES -->
                 <div class="card">
                     <div class="card-title">
                         <span>Melhores Clientes</span>
@@ -713,7 +722,6 @@
                         Total: R$ <span id="total-value">0,00</span>
                     </div>
                     
-                    <!-- NOVO: Busca de cliente -->
                     <div class="form-group">
                         <label for="client-search-pdv">🔍 Buscar Cliente</label>
                         <div class="client-search-wrapper">
@@ -853,6 +861,16 @@
                         <span>Vendas a Receber</span>
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
+
+                    <!-- Filtros -->
+                    <div style="display:flex; gap:8px; margin-bottom:15px;">
+                        <button class="btn btn-receivable-filter active" data-filter="pending">
+                            <i class="fas fa-clock"></i> A Receber
+                        </button>
+                        <button class="btn btn-receivable-filter" data-filter="paid">
+                            <i class="fas fa-check-circle"></i> Pagos
+                        </button>
+                    </div>
                     
                     <ul class="client-list" id="receivables-list">
                         <div class="loading">
@@ -861,7 +879,7 @@
                         </div>
                     </ul>
                     
-                    <div class="stats">
+                    <div class="stats" id="receivables-stats">
                         <div class="stat-item">
                             <div class="stat-value" id="to-receive-value">R$ 0,00</div>
                             <div class="stat-label">A Vencer</div>
@@ -1009,8 +1027,11 @@
             goal: 30000
         };
 
-        // NOVO: cliente selecionado via busca
+        // Cliente selecionado via busca
         let selectedClientFromSearch = null;
+
+        // Filtro da aba A Receber
+        let receivableFilter = 'pending';
         
         // Elementos do DOM
         const productList = document.getElementById('product-list');
@@ -1071,7 +1092,6 @@
         const reportType = document.getElementById('report-type');
         const detailedReport = document.getElementById('detailed-report');
 
-        // NOVOS elementos
         const monthProfitElement = document.getElementById('month-profit');
         const editGoalBtn = document.getElementById('edit-goal-btn');
         const clientSearchPdv = document.getElementById('client-search-pdv');
@@ -1208,7 +1228,7 @@
             updateSalesData();
         }
 
-        // ==================== NOVA FUNÇÃO: LUCRO DO MÊS ====================
+        // ==================== LUCRO DO MÊS ====================
         function calculateMonthProfit() {
             const today = new Date();
             const month = today.getMonth();
@@ -1352,65 +1372,145 @@
         function loadReceivables() {
             receivablesList.innerHTML = '';
             
-            if (receivables.length === 0) {
-                receivablesList.innerHTML = '<div class="empty-cart"><p>Nenhuma venda a receber</p></div>';
-                toReceiveValueElement.textContent = 'R$ 0,00';
-                overdueValueElement.textContent = 'R$ 0,00';
-                totalReceivablesElement.textContent = 'R$ 0,00';
-                return;
+            let filtered = [];
+            if (receivableFilter === 'pending') {
+                filtered = receivables.filter(r => r.status !== 'paid');
+            } else {
+                filtered = receivables.filter(r => r.status === 'paid');
             }
             
-            let toReceiveTotal = 0;
-            let overdueTotal = 0;
-            let totalReceivables = 0;
+            if (receivableFilter === 'pending') {
+                filtered.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+            } else {
+                filtered.sort((a, b) => {
+                    const da = a.paidAt ? new Date(a.paidAt) : new Date(0);
+                    const db = b.paidAt ? new Date(b.paidAt) : new Date(0);
+                    return db - da;
+                });
+            }
             
-            receivables.forEach(item => {
-                const today = new Date();
-                const dueDate = new Date(item.dueDate);
-                let status = 'pending';
-                let statusClass = 'pending';
-                
-                if (item.status === 'paid') {
-                    status = 'paid';
-                    statusClass = 'paid';
-                } else if (dueDate < today) {
-                    status = 'overdue';
-                    statusClass = 'overdue';
-                    overdueTotal += item.value;
-                } else {
-                    toReceiveTotal += item.value;
-                }
-                
-                totalReceivables += item.value;
-                
-                const formattedDate = dueDate.toLocaleDateString('pt-BR');
-                
-                const li = document.createElement('li');
-                li.className = 'client-item';
-                li.innerHTML = `
-                    <div class="client-info">
-                        <strong>${item.client}</strong>
-                        <div>Vencimento: ${formattedDate}</div>
-                        ${status !== 'paid' ? `
-                        <div class="receivable-actions">
-                            <button class="btn btn-small receive-payment" data-id="${item.id}">Receber</button>
+            if (filtered.length === 0) {
+                const emptyMsg = receivableFilter === 'pending'
+                    ? 'Nenhuma venda a receber'
+                    : 'Nenhum pagamento registrado';
+                receivablesList.innerHTML = `<div class="empty-cart"><i class="fas fa-file-invoice-dollar"></i><p>${emptyMsg}</p></div>`;
+            } else {
+                filtered.forEach(item => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const dueDate = new Date(item.dueDate);
+                    
+                    let statusClass = 'pending';
+                    let statusText = 'A Vencer';
+                    
+                    if (item.status === 'paid') {
+                        statusClass = 'paid';
+                        statusText = 'Pago';
+                    } else if (dueDate < today) {
+                        statusClass = 'overdue';
+                        statusText = 'Atrasado';
+                    }
+                    
+                    const formattedDate = dueDate.toLocaleDateString('pt-BR');
+                    
+                    let paidLine = '';
+                    if (item.status === 'paid') {
+                        if (item.paidAt) {
+                            const paidDate = new Date(item.paidAt).toLocaleDateString('pt-BR');
+                            paidLine = `<div style="color:#2ed573; font-size:12px; margin-top:2px;">
+                                <i class="fas fa-check-circle"></i> Pago em ${paidDate}
+                            </div>`;
+                        } else {
+                            paidLine = `<div style="color:#2ed573; font-size:12px; margin-top:2px;">
+                                <i class="fas fa-check-circle"></i> Pago
+                            </div>`;
+                        }
+                    }
+                    
+                    const li = document.createElement('li');
+                    li.className = 'client-item';
+                    li.innerHTML = `
+                        <div class="client-info">
+                            <strong>${item.client}</strong>
+                            <div>Vencimento: ${formattedDate}</div>
+                            ${paidLine}
+                            ${item.status !== 'paid' ? `
+                            <div class="receivable-actions">
+                                <button class="btn btn-small receive-payment" data-id="${item.id}">Receber</button>
+                            </div>
+                            ` : ''}
                         </div>
-                        ` : ''}
-                    </div>
-                    <div class="client-value ${statusClass}">R$ ${item.value.toFixed(2)}</div>
-                `;
-                receivablesList.appendChild(li);
-            });
+                        <div class="client-value ${statusClass}">R$ ${item.value.toFixed(2)}</div>
+                    `;
+                    receivablesList.appendChild(li);
+                });
+            }
             
-            toReceiveValueElement.textContent = `R$ ${toReceiveTotal.toFixed(2)}`;
-            overdueValueElement.textContent = `R$ ${overdueTotal.toFixed(2)}`;
-            totalReceivablesElement.textContent = `R$ ${totalReceivables.toFixed(2)}`;
+            updateReceivablesStats();
             
             document.querySelectorAll('.receive-payment').forEach(btn => {
                 btn.addEventListener('click', function() {
                     receivePayment(this.getAttribute('data-id'));
                 });
             });
+        }
+
+        function updateReceivablesStats() {
+            const statsContainer = document.getElementById('receivables-stats');
+            
+            if (receivableFilter === 'paid') {
+                let totalPaid = 0;
+                let countPaid = 0;
+                receivables.forEach(r => {
+                    if (r.status === 'paid') {
+                        totalPaid += r.value;
+                        countPaid++;
+                    }
+                });
+                statsContainer.innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-value" style="color:#2ed573;">R$ ${totalPaid.toFixed(2)}</div>
+                        <div class="stat-label">Total Recebido</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" style="color:#2ed573;">${countPaid}</div>
+                        <div class="stat-label">Pagamentos</div>
+                    </div>
+                `;
+            } else {
+                let toReceiveTotal = 0;
+                let overdueTotal = 0;
+                let totalReceivables = 0;
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                receivables.forEach(item => {
+                    if (item.status === 'paid') return;
+                    const dueDate = new Date(item.dueDate);
+                    if (dueDate < today) {
+                        overdueTotal += item.value;
+                    } else {
+                        toReceiveTotal += item.value;
+                    }
+                    totalReceivables += item.value;
+                });
+                
+                statsContainer.innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-value">R$ ${toReceiveTotal.toFixed(2)}</div>
+                        <div class="stat-label">A Vencer</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">R$ ${overdueTotal.toFixed(2)}</div>
+                        <div class="stat-label">Atrasado</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">R$ ${totalReceivables.toFixed(2)}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                `;
+            }
         }
 
         // ==================== DASHBOARD ====================
@@ -1422,7 +1522,6 @@
             goalPercentageElement.textContent = `${goalPercentage.toFixed(0)}%`;
             goalProgressElement.style.width = `${goalPercentage}%`;
 
-            // NOVO: atualizar lucro do mês
             const profit = calculateMonthProfit();
             if (profit > 0) {
                 monthProfitElement.textContent = `+R$ ${profit.toFixed(2).replace('.', ',')}`;
@@ -1920,7 +2019,6 @@
                         
                         saleModal.style.display = 'none';
                         
-                        // Limpar seleção de cliente (select + busca)
                         clientSelect.value = '';
                         selectedClientFromSearch = null;
                         clientSelectedDisplay.style.display = 'none';
@@ -2069,13 +2167,13 @@
                 if (e.key === 'Enter') searchStock();
             });
             
-            // Buscar clientes (aba clientes)
+            // Buscar clientes
             clientSearchBtn.addEventListener('click', searchClients);
             clientSearchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') searchClients();
             });
 
-            // ==================== NOVO: EDITAR META ====================
+            // Editar meta
             editGoalBtn.addEventListener('click', function() {
                 const currentGoal = sales.goal || 30000;
                 const input = prompt('Digite o novo valor da meta mensal (R$):', currentGoal.toFixed(2));
@@ -2090,7 +2188,7 @@
                 updateDashboard();
             });
 
-            // ==================== NOVO: BUSCA DE CLIENTE NO PDV ====================
+            // Busca de cliente no PDV
             clientSearchPdv.addEventListener('input', function() {
                 const term = this.value.trim().toLowerCase();
 
@@ -2143,6 +2241,23 @@
                     selectedClientFromSearch = null;
                     clientSelectedDisplay.style.display = 'none';
                 }
+            });
+
+            // ==================== FILTRO A RECEBER ====================
+            document.querySelectorAll('.btn-receivable-filter').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    receivableFilter = filter;
+                    
+                    document.querySelectorAll('.btn-receivable-filter').forEach(b => {
+                        b.classList.remove('active');
+                        if (b.getAttribute('data-filter') === filter) {
+                            b.classList.add('active');
+                        }
+                    });
+                    
+                    loadReceivables();
+                });
             });
         }
 
@@ -2320,6 +2435,7 @@
                 const receivable = receivables.find(r => r.id === receivableId);
                 if (receivable) {
                     receivable.status = 'paid';
+                    receivable.paidAt = new Date().toISOString();
                     saveReceivableToFirebase(receivable)
                         .catch(error => {
                             console.error('Erro ao atualizar recebível:', error);
