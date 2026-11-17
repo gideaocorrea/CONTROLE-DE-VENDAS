@@ -991,6 +991,17 @@
         </div>
     </div>
 
+    <!-- NOVO: Modal de Detalhes do Recebível -->
+    <div class="modal" id="receivable-detail-modal">
+        <div class="modal-content">
+            <div class="modal-title">Detalhes da Venda</div>
+            <div id="receivable-detail-content"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="close-receivable-detail">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
@@ -1429,9 +1440,10 @@
                     
                     const li = document.createElement('li');
                     li.className = 'client-item';
+                    // NOVO: nome do cliente tornou-se clicável
                     li.innerHTML = `
                         <div class="client-info">
-                            <strong>${item.client}</strong>
+                            <strong class="receivable-client-name" data-id="${item.id}" style="cursor:pointer; color:#2575fc; text-decoration:underline;">${item.client}</strong>
                             <div>Vencimento: ${formattedDate}</div>
                             ${paidLine}
                             ${item.status !== 'paid' ? `
@@ -1443,6 +1455,15 @@
                         <div class="client-value ${statusClass}">R$ ${item.value.toFixed(2)}</div>
                     `;
                     receivablesList.appendChild(li);
+
+                    // NOVO: listener de clique no nome
+                    const nameEl = li.querySelector('.receivable-client-name');
+                    if (nameEl) {
+                        nameEl.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            showReceivableDetail(this.getAttribute('data-id'));
+                        });
+                    }
                 });
             }
             
@@ -1978,11 +1999,20 @@
                         return;
                     }
                     
+                    // NOVO: agora o recebível guarda itens, clientId e saleDate
                     const receivable = {
                         client: clientName,
+                        clientId: clientId,
                         value: total,
                         dueDate: dueDate,
-                        status: 'pending'
+                        status: 'pending',
+                        saleDate: new Date().toISOString(),
+                        items: cart.map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            price: item.price,
+                            quantity: item.quantity
+                        }))
                     };
                     
                     saveReceivableToFirebase(receivable)
@@ -2259,6 +2289,11 @@
                     loadReceivables();
                 });
             });
+
+            // NOVO: fechar modal de detalhes do recebível
+            document.getElementById('close-receivable-detail').addEventListener('click', function() {
+                document.getElementById('receivable-detail-modal').style.display = 'none';
+            });
         }
 
         // Mostrar cliente selecionado na busca
@@ -2443,6 +2478,59 @@
                         });
                 }
             }
+        }
+
+        // NOVO: função que exibe os detalhes da venda no modal
+        function showReceivableDetail(receivableId) {
+            const item = receivables.find(r => r.id === receivableId);
+            if (!item) return;
+
+            // Normaliza items (Firebase pode devolver como objeto com chaves numéricas)
+            const items = item.items ? Object.values(item.items) : [];
+
+            const dueDate = new Date(item.dueDate).toLocaleDateString('pt-BR');
+            const saleDate = item.saleDate
+                ? new Date(item.saleDate).toLocaleDateString('pt-BR')
+                : '—';
+
+            let statusText = 'Pendente';
+            let statusColor = '#ffa502';
+            if (item.status === 'paid') {
+                statusText = 'Pago';
+                statusColor = '#2ed573';
+            } else if (new Date(item.dueDate) < new Date(new Date().toDateString())) {
+                statusText = 'Atrasado';
+                statusColor = '#ff4757';
+            }
+
+            let html = `
+                <p><strong>Cliente:</strong> ${item.client}</p>
+                <p><strong>Data da venda:</strong> ${saleDate}</p>
+                <p><strong>Vencimento:</strong> ${dueDate}</p>
+                <p><strong>Status:</strong> <span style="color:${statusColor}; font-weight:600;">${statusText}</span></p>
+                <hr style="margin:12px 0; border:none; border-top:1px solid #f0f0f0;">
+                <p><strong>Produtos:</strong></p>
+            `;
+
+            if (items.length > 0) {
+                items.forEach(it => {
+                    html += `
+                        <div class="sale-item">
+                            <div class="sale-info">${it.name} <small style="color:#888;">x ${it.quantity}</small></div>
+                            <div class="sale-value">R$ ${(it.price * it.quantity).toFixed(2)}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<p style="color:#888; font-size:13px;">
+                    Detalhes dos produtos não disponíveis (venda registrada antes desta atualização).
+                </p>`;
+            }
+
+            html += `<div class="cart-total">Total: R$ ${item.value.toFixed(2)}</div>`;
+
+            document.getElementById('receivable-detail-content').innerHTML = html;
+            document.getElementById('receivable-detail-modal').style.display = 'flex';
         }
         
         // ==================== BUSCAS ====================
